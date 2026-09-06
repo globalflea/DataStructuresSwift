@@ -15,6 +15,10 @@ public enum WALError: Error, Sendable, CustomStringConvertible, Equatable {
     case corruptedRecord(offset: UInt64, reason: String)
     case writerClosed
 
+    public static func invalidMagic(found: UInt32) -> WALError {
+        .invalidMagic(expected: 0, found: found)
+    }
+
     public var description: String {
         switch self {
         case .fileNotFound(let path):
@@ -22,6 +26,9 @@ public enum WALError: Error, Sendable, CustomStringConvertible, Equatable {
         case .ioError(let reason):
             return "WAL I/O error: \(reason)"
         case .invalidMagic(let expected, let found):
+            if expected == 0 {
+                return "WAL invalid magic header: found 0x\(String(found, radix: 16))"
+            }
             return "WAL invalid magic header: expected 0x\(String(expected, radix: 16)), found 0x\(String(found, radix: 16))"
         case .checksumMismatch(let expected, let actual):
             return "WAL CRC-64 checksum mismatch: expected 0x\(String(expected, radix: 16)), actual 0x\(String(actual, radix: 16))"
