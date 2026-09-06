@@ -176,4 +176,85 @@ public struct WALInspector: Sendable {
             return String(string.prefix(width))
         }
     }
+
+    // MARK: - CSV Export
+
+    /// Exports the WAL records into RFC 4180 compliant CSV format.
+    ///
+    /// - Parameters:
+    ///   - reverseOrder: When `true` (default), records are sorted in descending reverse-time order (newest first).
+    ///   - payloadDecoder: Optional closure providing custom human-readable decoding for payloads.
+    /// - Returns: A formatted CSV string with standard headers.
+    public func exportCSV(
+        reverseOrder: Bool = true,
+        payloadDecoder: (@Sendable (Data) -> String?)? = nil
+    ) throws -> String {
+        let reader = WALReader(path: path, format: format, expectedMagic: expectedMagic, allowTruncatedTail: true)
+        let (records, _) = try reader.readRecords()
+        return Self.formatCSV(records: records, reverseOrder: reverseOrder, payloadDecoder: payloadDecoder)
+    }
+
+    /// Exports WAL records to a CSV file at `destinationPath`.
+    public func exportCSV(
+        toPath destinationPath: String,
+        reverseOrder: Bool = true,
+        payloadDecoder: (@Sendable (Data) -> String?)? = nil
+    ) throws {
+        let csv = try exportCSV(reverseOrder: reverseOrder, payloadDecoder: payloadDecoder)
+        try csv.write(toFile: destinationPath, atomically: true, encoding: .utf8)
+    }
+
+    /// Formats an array of WALRecords into an RFC 4180 CSV string.
+    public static func formatCSV(
+        records: [WALRecord],
+        reverseOrder: Bool = true,
+        payloadDecoder: (@Sendable (Data) -> String?)? = nil
+    ) -> String {
+        let sorted = reverseOrder
+            ? records.sorted { $0.sequenceNumber > $1.sequenceNumber }
+            : records.sorted { $0.sequenceNumber < $1.sequenceNumber }
+
+        var rows: [String] = []
+        rows.append("sequence_number,timestamp_iso8601,offset,byte_size,payload_size,crc64_hex,magic_hex,payload")
+
+        let df = ISO8601DateFormatter()
+        df.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+
+        for rec in sorted {
+            let seq = String(rec.sequenceNumber)
+            let ts = df.string(from: rec.timestamp)
+            let offset = String(rec.offset)
+            let byteSize = String(rec.byteSize)
+            let payloadSize = String(rec.payload.count)
+            let crcHex = String(format: "0x%016llX", rec.crc64)
+            let magicHex = String(format: "0x%08X", rec.magic)
+
+            let payloadStr: String
+            if let custom = payloadDecoder?(rec.payload) {
+                payloadStr = custom
+            } else if let str = String(data: rec.payload, encoding: .utf8), !str.isEmpty {
+                payloadStr = str
+            } else {
+                payloadStr = rec.payload.map { String(format: "%02x", $0) }.joined()
+            }
+
+            let escapedPayload = escapeCSVField(payloadStr)
+            rows.append("\(seq),\(ts),\(offset),\(byteSize),\(payloadSize),\(crcHex),\(magicHex),\(escapedPayload)")
+        }
+
+        return rows.joined(separator: "\r\n")
+    }
+
+    /// Escapes a single string value to conform to RFC 4180 CSV specifications.
+    public static func escapeCSVField(_ value: String) -> String {
+        let containsSpecial = value.contains(",") || value.contains("\"") || value.contains("\n") || value.contains("\r")
+        if containsSpecial {
+            let escaped = value.replacingOccurrences(of: "\"", with: "\"\"")
+            return "\"\(escaped)\""
+        } else {
+            return value
+        }
+    }
+
 }
+

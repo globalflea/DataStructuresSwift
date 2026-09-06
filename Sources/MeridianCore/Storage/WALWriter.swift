@@ -35,7 +35,7 @@ public actor WALWriter {
     private var sequenceNumber: UInt64
 
     /// Current file byte offset.
-    private var fileOffset: UInt64
+    public private(set) var fileOffset: UInt64
 
     /// Background periodic timer task for `.everySecond` fsync scheduling.
     private var syncTask: Task<Void, Never>?
