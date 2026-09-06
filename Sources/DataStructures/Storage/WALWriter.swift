@@ -199,8 +199,8 @@ public actor WALWriter {
         isOpen = false
     }
 
-    /// Truncates the log file to zero length and resets sequence numbering.
-    public func truncate() throws {
+    /// Truncates the log file to zero length and resets sequence numbering to `newSequenceNumber`.
+    public func truncate(newSequenceNumber: UInt64 = 0) throws {
         guard isOpen, let handle = fileHandle else {
             throw WALError.writerClosed
         }
@@ -209,7 +209,7 @@ public actor WALWriter {
         try handle.truncate(atOffset: 0)
         try handle.seek(toOffset: 0)
         self.fileOffset = 0
-        self.sequenceNumber = 0
+        self.sequenceNumber = newSequenceNumber
         try handle.synchronize()
     }
 
