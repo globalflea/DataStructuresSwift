@@ -11,7 +11,7 @@ public enum PriorityOrder: Sendable, Equatable {
 /// A high-performance, array-backed binary heap priority queue.
 ///
 /// Provides logarithmic time $O(\log N)$ insertions and root extractions, with $O(1)$ constant-time root peek.
-/// Indispensable for event-time watermark sorting, out-of-order event reconstruction, and rule salience agendas.
+/// Indispensable for event-time watermark sorting, out-of-order event reconstruction, best-first $k$-NN searches, and rule salience agendas.
 public struct PriorityQueue<Element: Sendable>: Sendable {
     private var heap: [Element] = []
     private let areInIncreasingOrder: @Sendable (Element, Element) -> Bool
@@ -21,6 +21,13 @@ public struct PriorityQueue<Element: Sendable>: Sendable {
     /// - Parameter comparator: A predicate that returns `true` if its first argument should be ordered before its second argument.
     public init(comparator: @escaping @Sendable (Element, Element) -> Bool) {
         self.areInIncreasingOrder = comparator
+    }
+
+    /// Initializes an empty `PriorityQueue` with a custom priority ordering closure.
+    ///
+    /// - Parameter areInIncreasingOrder: Closure returning `true` if first element has higher priority than second.
+    public init(sort areInIncreasingOrder: @escaping @Sendable (Element, Element) -> Bool) {
+        self.areInIncreasingOrder = areInIncreasingOrder
     }
 
     /// Number of elements currently stored in the priority queue.
@@ -64,6 +71,11 @@ public struct PriorityQueue<Element: Sendable>: Sendable {
         heap.removeAll()
     }
 
+    /// Clears all elements from the priority queue (alias for `removeAll()`).
+    public mutating func clear() {
+        heap.removeAll()
+    }
+
     // MARK: - Binary Heap Sifting
 
     private mutating func siftUp(from index: Int) {
@@ -99,6 +111,11 @@ public struct PriorityQueue<Element: Sendable>: Sendable {
 }
 
 extension PriorityQueue where Element: Comparable {
+    /// Initializes an empty priority queue for comparable elements with min-heap ordering.
+    public init() {
+        self.init(order: .min)
+    }
+
     /// Initializes a priority queue with default min-heap or max-heap ordering.
     ///
     /// - Parameter order: `.min` for min-heap (default), `.max` for max-heap.
