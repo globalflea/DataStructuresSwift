@@ -1,13 +1,14 @@
 # DataStructuresSwift System Design Specification
-## Document 01: Core Collections & Distributed Resilience Primitives
+## Document 01: Core Collections, Distributed Resilience & Unified WAL Storage
 
 ---
 
 ## 1. Executive Summary & Problem Domain
 
-High-throughput distributed systems, real-time complex event processing (CEP) engines, and geospatial databases require two fundamental layers of foundation:
+High-throughput distributed systems, real-time complex event processing (CEP) engines, and geospatial databases require three fundamental layers of foundation:
 1. **Algorithmic Collections & Indexing**: Specialized, cache-friendly, thread-safe data structures that avoid $O(N)$ memory shifting, linear search, or lock contention during high-velocity updates.
 2. **Distributed Resilience Primitives**: Decoupled, non-blocking fault-tolerance patterns that isolate business execution from transient network partitions, process crashes, and at-least-once message duplicates.
+3. **Crash-Resilient Write-Ahead Log (WAL) Storage**: Generic append-only log engine with fixed-length binary framing, 64-bit CRC-64 verification, in-memory write buffering, configurable durability sync policies (`fsync`), torn EOF write recovery, and programmatic/diagnostic log inspection via `WALInspector`.
 
 **`DataStructuresSwift`** is a zero-dependency, pure Swift 6 library providing these shared building blocks to **`GruleSwift`**, **`Tile38Swift`**, and external microservices.
 
@@ -82,6 +83,33 @@ classDiagram
         +match(pattern: String, text: String)$ Bool
     }
 
+    class WALWriter {
+        +path: String
+        +format: WALFormat
+        +syncPolicy: WALSyncPolicy
+        +magic: UInt32
+        +bufferCapacity: Int
+        +open()
+        +append(payload: Data, timestamp: Date) WALRecord
+        +flush()
+        +close()
+        +truncate()
+    }
+
+    class WALReader {
+        +path: String
+        +format: WALFormat
+        +readAll() List~WALRecord~
+        +readRecords(fromOffset) Tuple
+    }
+
+    class WALInspector {
+        +path: String
+        +summary() WALSummary
+        +inspect(payloadDecoder) List~WALRecordInspection~
+        +dump(verbose, payloadDecoder) String
+    }
+
     class ResilientOutbox~Mutation~ {
         +capacity: Int
         +pendingCount: Int
@@ -107,42 +135,45 @@ classDiagram
 
     CircularEventBuffer --> RingBuffer : encapsulates
     ResilientOutbox --> RingBuffer : internal buffer
+    WALWriter --> CRC64 : frame checksum
+    WALReader --> CRC64 : verifies checksum
+    WALInspector --> WALReader : consumes
 ```
 
 ---
 
-### 2.2 Sequence Diagram (`sequenceDiagram`): Outbox Mutation & Deduplication
+### 2.2 Sequence Diagram (`sequenceDiagram`): WAL Append, Flush & Crash Recovery
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Caller as Engine / Agenda
-    participant Outbox as ResilientOutbox
-    participant Remote as Network Service
-    participant Ingress as Ingress Worker
-    participant Dedup as SlidingDeduplicator
-    participant Handler as Processing Logic
+    actor Caller as Engine / Worker
+    participant Writer as WALWriter (Actor)
+    participant Buffer as In-Memory Buffer
+    participant Disk as POSIX FileHandle / Disk
+    actor Inspector as WALInspector / Recovery
+    participant Reader as WALReader
 
-    Caller->>Outbox: enqueue(mutation) [O(1)]
-    Note over Outbox: Non-blocking write into bounded buffer
-    Outbox-->>Caller: true (Execution unblocked)
-    
-    rect rgb(240, 248, 255)
-        Note over Outbox,Remote: Background Asynchronous Flush Loop
-        Outbox->>Remote: dispatch(mutation)
-        Remote-->>Outbox: Ack (Success)
-        Outbox->>Outbox: Drop sent mutation & reset backoff
+    Caller->>Writer: append(payload: Data)
+    Note over Writer: Calculate CRC-64 & encode 32B Frame Header
+    Writer->>Buffer: append(header + payload)
+    alt Buffer count >= 64KB or syncPolicy == .always
+        Writer->>Disk: write(contentsOf: buffer)
+        opt syncPolicy == .always or .everySecond
+            Writer->>Disk: fcntl(F_FULLFSYNC) / fsync()
+        end
     end
+    Writer-->>Caller: WALRecord (SeqNum, Offset, Size)
 
-    Remote->>Ingress: Replay event delivery
-    Ingress->>Dedup: isDuplicate(fingerprint)
-    alt First time seen
-        Dedup-->>Ingress: false (Allow)
-        Ingress->>Handler: Process event
-    else Duplicate delivery
-        Dedup-->>Ingress: true (Suppress)
-        Note over Ingress: Event dropped safely (Idempotency)
+    Note over Disk,Inspector: Crash Occurs (Simulated Power Loss / Process Kill)
+    Inspector->>Reader: readRecords()
+    Reader->>Disk: Read sequential frames
+    Reader->>Reader: Verify Magic & Checksum CRC-64
+    opt Trailing partial write detected at EOF
+        Reader->>Reader: Isolate truncated tail offset without throwing
     end
+    Reader-->>Inspector: Valid Records + Clean Tail Recovery
+    Inspector-->>Caller: Rehydrated State / Dump Report
 ```
 
 ---
@@ -179,6 +210,13 @@ flowchart TD
         PT["PathTrie (Prefix Invalidation)"]
         CR["CRC64 (ECMA-182 Data Integrity)"]
         GL["Glob (Redis/Unix Pattern Matcher)"]
+        
+        subgraph StorageSub["Storage Subsystem"]
+            WW["WALWriter (Actor, Buffer, SyncPolicy)"]
+            WR["WALReader (Stream Decode, Torn EOF Recovery)"]
+            WI["WALInspector (Diagnostic Dump & Stats)"]
+            WF["WALFrame (32-byte Binary Framing)"]
+        end
     end
 
     subgraph Resilience["Resilience Module"]
@@ -192,9 +230,11 @@ flowchart TD
     
     Tile38["Tile38Swift (Geospatial Database)"] --> DataStructures
     Tile38 --> Resilience
+    Tile38 --> StorageSub
     
     Grule["GruleSwift (Inference & CEP Engine)"] --> DataStructures
     Grule --> Resilience
+    Grule --> StorageSub
 ```
 
 ---
@@ -216,7 +256,12 @@ flowchart TD
 ### 3.3 Algorithms & Pattern Matching
 - **`Glob`**: Zero-regex wildcard string matcher supporting Redis/Unix pattern conventions (`*`, `?`, `[abc]`, `[a-z]`, `[^0-9]`, backslash escaping).
 
-### 3.4 Resilience Primitives
+### 3.4 Crash-Resilient Write-Ahead Log (WAL) Storage
+- **`WALWriter`**: Actor-isolated append log writer with in-memory write buffering (64 KB default threshold) and `.everySecond` background timer `fsync` scheduling.
+- **`WALReader`**: Streaming log reader validating 32-byte frame headers, sequence numbers, and CRC-64 checksums with automatic torn-write truncation recovery at EOF.
+- **`WALInspector`**: Structural inspection utility providing metadata summaries (total records, byte count, sequence continuity, throughput), corruption status, and formatted table dumps.
+
+### 3.5 Resilience Primitives
 - **`ResilientOutbox`**: Non-blocking asynchronous mutation buffer isolating transactional callers from network partitions, with bounded memory overflow eviction and exponential backoff retry (base 250ms, max 10s, ±20% jitter).
 - **`SlidingDeduplicator`**: Sliding-window TTL cache evaluating deterministic fingerprints to guarantee exactly-once evaluation under at-least-once transport replay.
 - **`ConnectionSupervisor`**: Long-running supervisor actor managing socket lifecycles, health probing, and auto-reconnect backoffs.
@@ -228,6 +273,6 @@ flowchart TD
 
 | Target | Suites | Tests | Pass Rate | Code Coverage | Warnings |
 |---|---|---|---|---|---|
-| `DataStructures` | 6 | 28 | 100% | 94.73% | 0 |
+| `DataStructures` | 7 | 35 | 100% | 92.76% | 0 |
 | `Resilience` | 1 | 5 | 100% | 95.20% | 0 |
-| **Total** | **7** | **33** | **100%** | **>94.8%** | **0** |
+| **Total** | **8** | **40** | **100%** | **>93%** | **0** |
