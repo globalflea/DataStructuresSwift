@@ -1,0 +1,180 @@
+# GruleSwift Agent Guidelines & Engineering Standards
+
+These rules are unconditionally active for all development, refactoring, and feature work across projects, adhering to the global Eight-Pillar Engineering Protocol.
+
+## The Eight Core Engineering Pillars
+
+1. **Thorough & Concise Documentation & Design Diagrams**
+2. **Beautiful, Idiomatic, and Concise Code & Architectural Patterns (Polyglot)**
+3. **Full Subsystem & Dependent Service Propagation**
+4. **High-Coverage Unit Testing (Minimally >95%)**
+5. **Mandatory Full Test Suite Re-Execution**
+6. **GitHub Tagging & Semantic Versioning Recommendations**
+7. **Continuous Engineering History & Artifact Consolidation**
+8. **Common & Advanced Data Structures in Reusable Modules**
+
+---
+
+## Pillar 1: Thorough & Concise Documentation & Design Diagrams
+
+Design documentation must provide complete clarity on architectural decisions, performance trade-offs, and structural relationships.
+
+### Documentation Mandates
+1. **Explain the "Why", "What", and "Impact"**:
+   - Never just list code changes. Detail why architectural choices were made (e.g. why an $O(1)$ amortized sliding window using monotonic deques is superior to an $O(N)$ re-scan).
+   - Document time complexity ($O$), space complexity, thread-safety, reentrancy, and failure modes.
+   - Use clear markdown hierarchies, tables, and callouts (`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`).
+   - Maintain a master design document index (e.g., `Docs/Design/00_INDEX_AND_EXECUTIVE_SUMMARY.md`).
+
+2. **Mandatory Multi-Perspective Mermaid Diagrams**:
+   Every architectural design document must include relevant Mermaid diagrams to provide complete visual clarity:
+   - **UML Class Diagrams (`classDiagram`)**:
+     - Model all relevant protocols/interfaces/traits, structs, classes, actors, and data models.
+     - Depict relationships: inheritance/subtyping (`--|>`), interface implementation (`..|>`), associations (`-->`), aggregations (`o--`), and compositions (`*--`).
+     - Detail key fields, property types, method signatures, visibility markers (`+`, `-`, `#`), and stereotypes (`<<protocol>>`, `<<actor>>`, `<<interface>>`, `<<struct>>`).
+   - **Sequence Diagrams (`sequenceDiagram`)**:
+     - Model multi-component interactions, asynchronous actor/message flows, client-server protocols (REST, gRPC, WebSockets), and temporal event sequences.
+     - Include numbered steps (`autonumber`), activation boxes, and clear participant groupings.
+   - **State Transition Diagrams (`stateDiagram-v2`)**:
+     - Model state machine lifecycles, discrete states, transition triggers, multi-factor guards, and terminal conditions.
+   - **Data Pipelines & Topology Flowcharts (`flowchart TD` / `flowchart LR`)**:
+     - Model end-to-end data processing pipelines, ingress-to-egress routing, and component topology.
+
+3. **Mermaid 11 Formatting & Validation**:
+   - **Parentheses Quoting Rule**: Node labels containing parentheses, brackets, or punctuation must be enclosed in double quotes inside brackets: `NodeId["Label (Details)"]`.
+   - **Subgraph Identifiers**: Subgraphs must use clean alphanumeric identifiers with separate quoted titles: `subgraph SubId ["Title"]`.
+   - **Avoid HTML tags in labels**: Avoid raw `<br>` or HTML entities that cause parser failures; prefer clean text or quoted strings.
+   - **Automated Validation**: Always validate all Mermaid diagrams using `@mermaid-js/mermaid-cli`:
+     ```bash
+     npx -y @mermaid-js/mermaid-cli -i <design-doc.md> -o /tmp/validate.svg
+     ```
+
+---
+
+4. **Meaningful In-Code Comments & API Docstrings**:
+   - Every public, package, and internal symbol (protocols, classes, structs, actors, enums, functions, methods, properties, and initializers) must be accompanied by rich, meaningful documentation comments (`///` in Swift, `/** ... */` in TypeScript/Java/Kotlin, `// ...` in Go, `## ...` in Python).
+   - Docstrings must clearly articulate:
+     - **Intent & Domain Semantics**: What purpose the symbol serves and why it was structured this way.
+     - **Contracts & Coordinate Conventions**: Coordinate order (e.g. `(lon, lat)` in GeoJSON vs `(lat, lon)` in query arguments), boundary conventions, nullability/optional semantics, and RFC/industry standards (e.g. RFC 7946, WGS84).
+     - **Algorithmic Invariants & Complexity**: Big-O time and space complexity, memory layout notes, and non-obvious mathematical invariants.
+     - **Parameters, Return Values & Failure Modes**: Units of measurement (e.g. meters, radians, degrees, seconds), parameter semantics, returned values, and specific typed errors thrown.
+   - Inline comments must explain non-obvious algorithmic transitions (e.g. ray-casting parity toggles, Sutherland-Hodgman clipping intersection math, quadkey bit-interleaving masks, geodesic curvature corrections) without cluttering self-explanatory code.
+
+---
+
+## Pillar 2: Beautiful, Idiomatic, and Concise Code & Architectural Patterns
+
+Write modern, expressive, clean, and concise code conforming to the official idiomatic guidelines and style standards of the chosen programming language (e.g., Effective Go, Swift API Design Guidelines, PEP 8 / Modern Python 3.12+ Type Hints, Rust API Guidelines, TypeScript Strict Mode, Modern C++ Core Guidelines, Effective Kotlin/Java).
+
+### Polyglot Coding Principles
+1. **Strong Typing & Value Semantics**:
+   - Favor immutability, strong value semantics (data classes, structs, enums, records), interface/protocol/trait-driven design, and generic type constraints over loosely typed dictionaries or raw untyped maps where contracts matter.
+   - Model domain states with expressive algebraic data types (sealed classes, discriminated unions, enums with associated values) to make illegal states unrepresentable at compile time.
+2. **Modern Structured Concurrency & Concurrency Safety**:
+   - Use modern structured concurrency primitives (`async`/`await`, actors, goroutines/channels, task groups, thread-safe memory models) rather than unmanaged threads, raw locks, or detached asynchronous fire-and-forget tasks.
+   - Enforce explicit thread-safety boundaries, eliminate data races, and handle graceful cancellation cooperatively.
+3. **Concise, Defensive, and Functional Flow Control**:
+   - Leverage pattern matching, exhaustive switches, guard clauses / early returns, expressive optionals/nullables, and functional collection transformations (`map`, `filter`, `reduce`).
+   - Eliminate forced unwrapping, unhandled null/nil pointers, magic numbers, and silent exception swallowings. Fail fast with typed, informative errors.
+4. **Zero Waste & Eloquence**:
+   - Avoid unnecessary verbosity, redundant boilerplate, premature complexity, dead code, or obsolete legacy patterns. Code must be elegant, self-documenting, readable, and immediately intuitive to maintainers.
+5. **Self-Documenting Code & Meaningful In-Code Comments**:
+   - Maintain rich, expressive documentation comments across all public and internal interfaces. Document coordinate conventions, non-obvious algorithmic transitions, edge cases, and computational complexity directly at the point of declaration.
+
+### Go-to-Swift Modernization & Architectural Elegance Principles
+When porting code from Go (or other procedural/systems languages) to modern Swift:
+1. **Elevate Idioms, Never Transliterate**: Never write C-style Go code in Swift syntax. Eliminate raw pointers (`*T`), raw mutexes (`sync.RWMutex`, `sync.Mutex`), untyped empty interfaces (`interface{}` / `any`), and sentinel error strings.
+2. **Strong Value Semantics & Immutability**: Favor immutable `Sendable` `struct`s with value semantics over mutable class references. Utilize Copy-on-Write (COW) optimization where large data buffers or trees benefit from value semantics without redundant deep copying.
+3. **Structured Concurrency Over Raw Goroutines & Locks**: Encapsulate mutable state inside isolated Swift `actor`s. Replace channel pumps with `AsyncStream` / `AsyncSequence` and task groups, ensuring compile-time data race safety under Swift 6.
+4. **Compile-Time Monomorphized Generics**: Use generic constraints (`<Element: SpatialIndexable>`, `<Key: Comparable, Value>`) to eliminate runtime type assertions, heap boxing, and dynamic dispatch overhead.
+5. **Expressive Algebraic Data Types**: Model domain states, error hierarchies, and event transitions using `enum`s with associated values to make invalid states unrepresentable.
+6. **Swift API Design Guidelines**: Craft APIs that read fluently at use sites as grammatical English phrases (e.g., `polygon.contains(point:)`, `rect.intersects(geometry:)`).
+7. **Proactive Architectural Improvements**: Actively improve design trade-offs over the original Go implementation—optimizing memory locality, improving cache friendliness, and providing lock-free snapshotting for read transactions.
+
+---
+
+## Pillar 3: Full Subsystem & Dependent Service Propagation
+
+Software architectures operate as interconnected ecosystems. When modifying core domain models, protocols, data contexts, ASTs, or state managers, actively propagate changes to all dependent layers:
+1. **API & Server Layers**: Update HTTP/REST endpoints, WebSocket channels, and gRPC service implementations. Ensure request/response schemas reflect updated contracts.
+2. **Tooling & Compilers**: Propagate changes to linters, static analyzers, compilers, and code generators.
+3. **Client SDKs & Downstream Consumers**: Ensure client libraries, CLI binaries, and external integrations maintain 100% feature parity and compile cleanly.
+
+---
+
+## Pillar 4: High-Coverage Unit Testing (Minimally >95%)
+
+All new components, features, algorithms, and bug fixes must be accompanied by comprehensive unit test suites:
+1. **Coverage Target**: Code coverage on new files and modified logic must minimally be greater than **95%** (target 95-100%).
+2. **Every Public API**: Must have dedicated tests verifying correct return values, boundary behaviors, and parameter validation.
+3. **Fail-Fast & Error Paths**: Explicitly test that malformed data, schema violations, invalid inputs, timeouts, and boundary limits produce expected typed errors.
+4. **Concurrency & Thread Safety**: Test multi-threaded execution across concurrent tasks/workers to guarantee thread safety without race conditions or deadlocks.
+
+---
+
+## Pillar 5: Mandatory Full Test Suite Re-Execution
+
+Never commit, conclude a milestone, or declare a task complete without executing the project's entire automated test suite:
+- **Execution**: Run the full repository test command (`swift test`, `go test ./...`, `pytest`, `npm test`, `cargo test`, etc.).
+- **Zero Failures**: 100% of all unit tests, integration tests, and end-to-end tests must pass cleanly.
+- **Zero Regressions**: No existing functionality or backward compatibility may be broken.
+- **Clean Git Hygiene**: Commits must use `--no-gpg-sign` and clear conventional commit messages:
+  ```bash
+  git commit -n --no-gpg-sign -m "feat(component): descriptive summary"
+  ```
+
+---
+
+## Pillar 6: GitHub Tagging & Semantic Versioning Recommendations
+
+The completion of an `implementation_plan.md` and its verified `walkthrough.md` serves as the primary milestone boundary and evaluation anchor for proposing a repository release tag on GitHub.
+
+### Tagging Protocol & SemVer Reference
+- **Walkthrough as Milestone Anchor**: Whenever a `walkthrough.md` confirms that all proposed changes have been implemented, tested, and verified with zero regressions, evaluate whether the completed scope warrants a release tag.
+- **Strict Semantic Versioning (`vMAJOR.MINOR.PATCH`)**:
+  - **`PATCH` (`v1.0.X`)**: Bug fixes, minor optimizations, or documentation/history consolidations verified by a walkthrough that maintain 100% backward compatibility.
+  - **`MINOR` (`v1.X.0`)**: Backward-compatible new capabilities, features, or architectural enhancements verified by an implementation plan and walkthrough.
+  - **`MAJOR` (`vX.0.0`)**: Incompatible public API changes or fundamental architectural paradigm shifts.
+- **Tag Proposal Structure**:
+  - State the recommended semantic version tag (e.g. `v1.1.0`).
+  - State the milestone rationale anchored directly in the completed `implementation_plan.md` and `walkthrough.md`.
+  - Provide ready-to-publish release notes synthesized directly from the verified accomplishments and benchmark metrics in the walkthrough.
+  - Upon user confirmation, create the annotated tag and push:
+    ```bash
+    git tag -a v1.X.0 -m "Release v1.X.0: Summary of features"
+    git push origin v1.X.0
+    ```
+
+---
+
+## Pillar 7: Continuous Engineering History & Artifact Consolidation
+
+Proactively maintain and consolidate the project's historical engineering record:
+1. **Never Discard Working Context**: Working memory artifacts (`implementation_plan.md` and `walkthrough.md`) document critical architectural decisions, alternatives evaluated, verification metrics, and benchmark results. Never discard or overwrite them without preserving their contents in the project's chronological archive.
+2. **Repository Archive Layout (`Docs/History/` or project equivalent)**:
+   - **`00_MASTER_CHRONOLOGICAL_INDEX.md`: Master chronological timeline linking all project milestones.
+   - **`01_<PROJECT>_CHRONOLOGY.md`: Comprehensive, unabridged archive of all implementation plans and walkthroughs across every developmental era.
+   - **`02_OTHER_PROJECTS_CHRONOLOGY.md`: Chronological archive for adjacent systems.
+3. **Consolidation Workflow**:
+   - At the conclusion of any major task or milestone, append the implementation plan and walkthrough into the chronological archive with explicit timestamps and commit hashes.
+   - Update the master chronological index table.
+   - Ensure all diagrams inside the consolidated history strictly adhere to Mermaid 11 syntax.
+
+---
+
+## Pillar 8: Common & Advanced Data Structures in Reusable Modules
+
+Abstract reusable, domain-agnostic data structures and high-performance algorithms out of domain-specific logic into shared collections/utilities packages (e.g., `Collections/` or `pkg/collections`):
+1. **Decouple Generic Algorithms from Domain Logic**:
+   - Abstract reusable data structures and algorithms (e.g. `MonotonicDeque`, `RingBuffer`, `PriorityQueue`, `PathTrie`, `IntervalTree`, `ConcurrentMap`) into generic modules.
+   - Do not embed generic algorithmic logic directly inside domain classes; isolate them into clean, generic structures conforming to standard language collection interfaces and concurrency protocols.
+2. **Eliminate Hidden $O(N)$ Bottlenecks**:
+   - Favor circular `RingBuffer` over dynamic array head removal (`removeFirst()`) to prevent $O(N)$ contiguous element shifting in sliding windows and queues.
+   - Maintain continuous running aggregates in $O(1)$ via monotonic double-ended queues (`MonotonicDeque`) rather than costly $O(N)$ window re-scans.
+   - Use `PathTrie` or prefix trees for hierarchical symbol and namespace indexing rather than linear string scanning.
+   - Use binary heaps / priority queues for event-time watermark alignment and priority agenda sorting.
+3. **Dedicated Unit Testing & Benchmarking**:
+   - Every abstract data structure must have dedicated, isolated unit tests with exhaustive test coverage (>95%) and randomized stress tests verifying mathematical invariants under high-throughput conditions.
+
+---
+*For the full global skill specification, see [~/.gemini/config/skills/core-engineering-standards/SKILL.md](file:///Users/globalflea/.gemini/config/skills/core-engineering-standards/SKILL.md).*

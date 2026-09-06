@@ -1,0 +1,4 @@
+/Users/globalflea/Xplore/DataStructuresSwift/Sources/Resilience/ConnectionSupervisor.swift
+/Users/globalflea/Xplore/DataStructuresSwift/Sources/Resilience/DesiredStateReconciler.swift
+/Users/globalflea/Xplore/DataStructuresSwift/Sources/Resilience/ResilientOutbox.swift
+/Users/globalflea/Xplore/DataStructuresSwift/Sources/Resilience/SlidingDeduplicator.swift

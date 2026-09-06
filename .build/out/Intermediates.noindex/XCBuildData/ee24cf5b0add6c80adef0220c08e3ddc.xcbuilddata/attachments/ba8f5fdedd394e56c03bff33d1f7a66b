@@ -1,0 +1,29 @@
+{
+  "" : {
+    "diagnostics" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/ResilienceTests-primary.dia",
+    "emit-module-dependencies" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/ResilienceTests-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/ResilienceTests-primary-emit-module.dia",
+    "pch" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/ResilienceTests-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/ResilienceTests-primary.swiftdeps"
+  },
+  "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/DerivedSources/test_entry_point.swift" : {
+    "const-values" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/test_entry_point.swiftconstvalues",
+    "dependencies" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/test_entry_point.d",
+    "diagnostics" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/test_entry_point.dia",
+    "index-unit-output-path" : "/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/test_entry_point.o",
+    "llvm-bc" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/test_entry_point.bc",
+    "object" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/test_entry_point.o",
+    "swift-dependencies" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/test_entry_point.swiftdeps",
+    "swiftmodule" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/test_entry_point~partial.swiftmodule"
+  },
+  "/Users/globalflea/Xplore/DataStructuresSwift/Tests/ResilienceTests/ResilienceTests.swift" : {
+    "const-values" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/ResilienceTests.swiftconstvalues",
+    "dependencies" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/ResilienceTests.d",
+    "diagnostics" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/ResilienceTests.dia",
+    "index-unit-output-path" : "/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/ResilienceTests.o",
+    "llvm-bc" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/ResilienceTests.bc",
+    "object" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/ResilienceTests.o",
+    "swift-dependencies" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/ResilienceTests.swiftdeps",
+    "swiftmodule" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/ResilienceTests-p.build/Objects-normal/arm64/ResilienceTests~partial.swiftmodule"
+  }
+}

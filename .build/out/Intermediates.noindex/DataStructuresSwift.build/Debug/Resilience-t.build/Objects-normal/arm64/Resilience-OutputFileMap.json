@@ -1,0 +1,49 @@
+{
+  "" : {
+    "diagnostics" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/Resilience-primary.dia",
+    "emit-module-dependencies" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/Resilience-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/Resilience-primary-emit-module.dia",
+    "pch" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/Resilience-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/Resilience-primary.swiftdeps"
+  },
+  "/Users/globalflea/Xplore/DataStructuresSwift/Sources/Resilience/ConnectionSupervisor.swift" : {
+    "const-values" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/ConnectionSupervisor.swiftconstvalues",
+    "dependencies" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/ConnectionSupervisor.d",
+    "diagnostics" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/ConnectionSupervisor.dia",
+    "index-unit-output-path" : "/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/ConnectionSupervisor.o",
+    "llvm-bc" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/ConnectionSupervisor.bc",
+    "object" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/ConnectionSupervisor.o",
+    "swift-dependencies" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/ConnectionSupervisor.swiftdeps",
+    "swiftmodule" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/ConnectionSupervisor~partial.swiftmodule"
+  },
+  "/Users/globalflea/Xplore/DataStructuresSwift/Sources/Resilience/DesiredStateReconciler.swift" : {
+    "const-values" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/DesiredStateReconciler.swiftconstvalues",
+    "dependencies" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/DesiredStateReconciler.d",
+    "diagnostics" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/DesiredStateReconciler.dia",
+    "index-unit-output-path" : "/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/DesiredStateReconciler.o",
+    "llvm-bc" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/DesiredStateReconciler.bc",
+    "object" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/DesiredStateReconciler.o",
+    "swift-dependencies" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/DesiredStateReconciler.swiftdeps",
+    "swiftmodule" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/DesiredStateReconciler~partial.swiftmodule"
+  },
+  "/Users/globalflea/Xplore/DataStructuresSwift/Sources/Resilience/ResilientOutbox.swift" : {
+    "const-values" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/ResilientOutbox.swiftconstvalues",
+    "dependencies" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/ResilientOutbox.d",
+    "diagnostics" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/ResilientOutbox.dia",
+    "index-unit-output-path" : "/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/ResilientOutbox.o",
+    "llvm-bc" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/ResilientOutbox.bc",
+    "object" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/ResilientOutbox.o",
+    "swift-dependencies" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/ResilientOutbox.swiftdeps",
+    "swiftmodule" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/ResilientOutbox~partial.swiftmodule"
+  },
+  "/Users/globalflea/Xplore/DataStructuresSwift/Sources/Resilience/SlidingDeduplicator.swift" : {
+    "const-values" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/SlidingDeduplicator.swiftconstvalues",
+    "dependencies" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/SlidingDeduplicator.d",
+    "diagnostics" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/SlidingDeduplicator.dia",
+    "index-unit-output-path" : "/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/SlidingDeduplicator.o",
+    "llvm-bc" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/SlidingDeduplicator.bc",
+    "object" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/SlidingDeduplicator.o",
+    "swift-dependencies" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/SlidingDeduplicator.swiftdeps",
+    "swiftmodule" : "/Users/globalflea/Xplore/DataStructuresSwift/.build/out/Intermediates.noindex/DataStructuresSwift.build/Debug/Resilience-t.build/Objects-normal/arm64/SlidingDeduplicator~partial.swiftmodule"
+  }
+}
