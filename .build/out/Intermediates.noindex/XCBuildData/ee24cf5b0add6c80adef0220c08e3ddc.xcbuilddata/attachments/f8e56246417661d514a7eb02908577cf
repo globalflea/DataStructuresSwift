@@ -1,4 +1,0 @@
-module DataStructures {
-header "DataStructures-Swift.h"
-export *
-}
