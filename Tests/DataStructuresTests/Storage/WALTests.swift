@@ -220,3 +220,34 @@ struct WALTests {
         #expect(String(data: records[1].payload, encoding: .utf8)?.contains("user:2") == true)
     }
 }
+
+extension WALTests {
+    @Test("WALReader repair truncates torn EOF tail cleanly")
+    func testRepairTornTail() async throws {
+        let path = createTempWALPath()
+        defer { cleanup(path: path) }
+
+        let writer = WALWriter(path: path, format: .binary, syncPolicy: .always)
+        try await writer.open()
+        try await writer.append(payload: Data("Valid 1".utf8))
+        try await writer.append(payload: Data("Valid 2".utf8))
+        try await writer.close()
+
+        let validSize = try Data(contentsOf: URL(fileURLWithPath: path)).count
+
+        // Append 9 bytes of garbage simulating interrupted power cut write
+        let handle = try FileHandle(forWritingTo: URL(fileURLWithPath: path))
+        try handle.seekToEnd()
+        try handle.write(contentsOf: Data([0x57, 0x41, 0x4C, 0x31, 0x01, 0x02, 0x03, 0x04, 0x05]))
+        try handle.close()
+
+        let reader = WALReader(path: path, format: .binary)
+        let (validCount, truncatedBytes) = try reader.repair()
+
+        #expect(validCount == 2)
+        #expect(truncatedBytes == 9)
+
+        let repairedSize = try Data(contentsOf: URL(fileURLWithPath: path)).count
+        #expect(repairedSize == validSize)
+    }
+}

@@ -72,6 +72,21 @@ public struct WALReader: Sendable {
         return records.last?.sequenceNumber
     }
 
+    /// Repairs a corrupted log file by truncating any partial / torn write at EOF.
+    @discardableResult
+    public func repair() throws -> (validCount: Int, truncatedBytes: Int) {
+        let (records, tailOffset) = try readRecords()
+        guard let tail = tailOffset else {
+            return (records.count, 0)
+        }
+        let fileHandle = try FileHandle(forUpdating: URL(fileURLWithPath: path))
+        let fullSize = try fileHandle.seekToEnd()
+        try fileHandle.truncate(atOffset: tail)
+        try fileHandle.synchronize()
+        try fileHandle.close()
+        return (records.count, Int(fullSize - tail))
+    }
+
     // MARK: - Internal Decoding
 
     private func readBinaryRecords(
