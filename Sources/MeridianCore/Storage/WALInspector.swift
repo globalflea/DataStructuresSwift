@@ -211,8 +211,18 @@ public struct WALInspector: Sendable {
         payloadDecoder: (@Sendable (Data) -> String?)? = nil
     ) -> String {
         let sorted = reverseOrder
-            ? records.sorted { $0.sequenceNumber > $1.sequenceNumber }
-            : records.sorted { $0.sequenceNumber < $1.sequenceNumber }
+            ? records.sorted {
+                if $0.timestamp == $1.timestamp {
+                    return $0.sequenceNumber > $1.sequenceNumber
+                }
+                return $0.timestamp > $1.timestamp
+            }
+            : records.sorted {
+                if $0.timestamp == $1.timestamp {
+                    return $0.sequenceNumber < $1.sequenceNumber
+                }
+                return $0.timestamp < $1.timestamp
+            }
 
         var rows: [String] = []
         rows.append("sequence_number,timestamp_iso8601,offset,byte_size,payload_size,crc64_hex,magic_hex,payload")
