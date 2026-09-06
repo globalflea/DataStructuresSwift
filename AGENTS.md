@@ -1,4 +1,4 @@
-# DataStructuresSwift Agent Guidelines & Engineering Standards
+# MeridianCore Agent Guidelines & Engineering Standards
 
 These rules are unconditionally active for all development, refactoring, and feature work across projects, adhering to the global Ten-Pillar Engineering Protocol.
 

@@ -5,7 +5,7 @@
 
 import Foundation
 import Testing
-@testable import DataStructures
+@testable import MeridianCore
 
 @Suite("BTree Cache-Friendly Index Tests")
 struct BTreeTests {

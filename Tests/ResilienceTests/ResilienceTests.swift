@@ -7,7 +7,7 @@
 
 import Foundation
 import Testing
-@testable import DataStructures
+@testable import MeridianCore
 @testable import Resilience
 
 final class SafeBox<T>: @unchecked Sendable {

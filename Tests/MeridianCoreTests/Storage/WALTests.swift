@@ -5,7 +5,7 @@
 
 import Foundation
 import Testing
-@testable import DataStructures
+@testable import MeridianCore
 
 @Suite("Write-Ahead Log (WAL) Storage & Inspector Tests")
 struct WALTests {

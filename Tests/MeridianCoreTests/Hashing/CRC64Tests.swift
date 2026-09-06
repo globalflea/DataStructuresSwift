@@ -5,7 +5,7 @@
 
 import Foundation
 import Testing
-@testable import DataStructures
+@testable import MeridianCore
 
 @Suite("CRC-64 ECMA-182 Data Integrity Tests")
 struct CRC64Tests {

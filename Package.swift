@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "DataStructuresSwift",
+    name: "MeridianCore",
     platforms: [
         .macOS(.v14),
         .iOS(.v17),
@@ -12,20 +12,25 @@ let package = Package(
     ],
     products: [
         .library(
-            name: "DataStructures",
-            targets: ["DataStructures"]
+            name: "MeridianCore",
+            targets: ["MeridianCore"]
         ),
         .library(
             name: "Resilience",
             targets: ["Resilience"]
-        )
+        ),
+        // Compatibility alias for transition
+        .library(
+            name: "DataStructures",
+            targets: ["MeridianCore"]
+        ),
     ],
     dependencies: [],
     targets: [
         .target(
-            name: "DataStructures",
+            name: "MeridianCore",
             dependencies: [],
-            path: "Sources/DataStructures",
+            path: "Sources/MeridianCore",
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
                 .enableExperimentalFeature("StrictConcurrency")
@@ -33,7 +38,7 @@ let package = Package(
         ),
         .target(
             name: "Resilience",
-            dependencies: ["DataStructures"],
+            dependencies: ["MeridianCore"],
             path: "Sources/Resilience",
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
@@ -41,13 +46,13 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "DataStructuresTests",
-            dependencies: ["DataStructures"],
-            path: "Tests/DataStructuresTests"
+            name: "MeridianCoreTests",
+            dependencies: ["MeridianCore"],
+            path: "Tests/MeridianCoreTests"
         ),
         .testTarget(
             name: "ResilienceTests",
-            dependencies: ["DataStructures", "Resilience"],
+            dependencies: ["MeridianCore", "Resilience"],
             path: "Tests/ResilienceTests"
         )
     ]

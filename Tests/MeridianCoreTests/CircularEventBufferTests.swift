@@ -7,7 +7,7 @@
 
 import Foundation
 import Testing
-@testable import DataStructures
+@testable import MeridianCore
 
 struct MockEvent: TimestampedItem, Equatable {
     let id: String

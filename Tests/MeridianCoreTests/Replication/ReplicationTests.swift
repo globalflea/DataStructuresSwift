@@ -5,7 +5,7 @@
 
 import Testing
 import Foundation
-@testable import DataStructures
+@testable import MeridianCore
 
 struct MockRecord: SequencedRecord, Equatable {
     let sequenceNumber: UInt64

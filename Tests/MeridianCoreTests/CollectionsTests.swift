@@ -7,7 +7,7 @@
 
 import Foundation
 import Testing
-@testable import DataStructures
+@testable import MeridianCore
 
 @Suite("DataStructures Core Collections Tests")
 struct CollectionsTests {
