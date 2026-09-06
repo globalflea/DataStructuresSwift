@@ -43,13 +43,13 @@ public struct WALReader: Sendable {
     /// Reads records starting from a specific byte offset, returning decoded entries and any torn tail offset.
     public func readRecords(fromOffset startOffset: UInt64 = 0) throws -> (records: [WALRecord], truncatedTailOffset: UInt64?) {
         guard FileManager.default.fileExists(atPath: path) else {
-            return ([], nil)
+            throw WALError.fileNotFound(path: path)
         }
 
         let fileURL = URL(fileURLWithPath: path)
         let fileData: Data
         do {
-            fileData = try Data(contentsOf: fileURL, options: .alwaysMapped)
+            fileData = try Data(contentsOf: fileURL)
         } catch {
             throw WALError.ioError(reason: "Failed to read WAL file at \(path): \(error.localizedDescription)")
         }
@@ -75,6 +75,13 @@ public struct WALReader: Sendable {
     /// Repairs a corrupted log file by truncating any partial / torn write at EOF.
     @discardableResult
     public func repair() throws -> (validCount: Int, truncatedBytes: Int) {
+        guard FileManager.default.fileExists(atPath: path) else {
+            throw WALError.fileNotFound(path: path)
+        }
+
+        let fileData = try Data(contentsOf: URL(fileURLWithPath: path))
+        guard !fileData.isEmpty else { return (0, 0) }
+
         let (records, tailOffset) = try readRecords()
         guard let tail = tailOffset else {
             return (records.count, 0)
