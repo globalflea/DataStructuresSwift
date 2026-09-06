@@ -1,21 +1,148 @@
-# GruleSwift Agent Guidelines & Engineering Standards
+# DataStructuresSwift Agent Guidelines & Engineering Standards
 
-These rules are unconditionally active for all development, refactoring, and feature work across projects, adhering to the global Eight-Pillar Engineering Protocol.
+These rules are unconditionally active for all development, refactoring, and feature work across projects, adhering to the global Ten-Pillar Engineering Protocol.
 
-## The Eight Core Engineering Pillars
+## The Ten Core Engineering Pillars
 
-1. **Thorough & Concise Documentation & Design Diagrams**
-2. **Beautiful, Idiomatic, and Concise Code & Architectural Patterns (Polyglot)**
-3. **Full Subsystem & Dependent Service Propagation**
-4. **High-Coverage Unit Testing (Minimally >95%)**
-5. **Mandatory Full Test Suite Re-Execution**
-6. **GitHub Tagging & Semantic Versioning Recommendations**
-7. **Continuous Engineering History & Artifact Consolidation**
-8. **Common & Advanced Data Structures in Reusable Modules**
+1. **Deep Analytical Rigor, Upfront Honesty & Constructive Challenge**
+2. **Strict Language-Specific Coding Conventions & Naming Standards (Polyglot)**
+3. **Thorough & Concise Documentation & Design Diagrams**
+4. **Beautiful, Idiomatic, and Concise Code & Architectural Patterns**
+5. **Full Subsystem & Dependent Service Propagation**
+6. **High-Coverage Unit Testing (Minimally >95%)**
+7. **Mandatory Full Test Suite Re-Execution**
+8. **GitHub Tagging & Semantic Versioning Recommendations**
+9. **Continuous Engineering History & Artifact Consolidation**
+10. **Common & Advanced Data Structures in Reusable Modules**
 
 ---
 
-## Pillar 1: Thorough & Concise Documentation & Design Diagrams
+## Pillar 1: Deep Analytical Rigor, Upfront Honesty & Constructive Challenge
+
+Every engineer and AI agent operating under this protocol must maintain the highest standards of intellectual honesty, deep analytical scrutiny, and constructive challenge.
+
+### Principles of Analytical Rigor
+1. **Never Be a Passive Order-Taker or Sycophant**:
+   - Never simply validate, rubber-stamp, or blindly execute a request, architectural idea, or technical design just because it was proposed by the user.
+   - Apply deep, first-principles analytical thinking to dissect requirements, architectural assumptions, and proposed implementations.
+2. **Upfront, Candid, and Uncompromising Honesty**:
+   - If an idea has flaws, weaknesses, scalability bottlenecks, race conditions, memory leaks, unneeded complexity, or architectural anti-patterns, call them out immediately, honestly, and without hesitation.
+   - Deliver critiques directly, objectively, and factually, without sugarcoating, ambiguity, or hedging.
+3. **Propose Superior Alternatives Proactively**:
+   - Never present critique in a vacuum without an actionable solution.
+   - Whenever an idea is suboptimal or a superior pattern exists, formulate and present better alternatives supported by concrete technical rationales:
+     - Big-O algorithmic time and space complexity ($O(1)$ vs $O(N)$).
+     - Memory locality, cache friendliness, and allocation overhead.
+     - Concurrency safety, lock contention, and reentrancy guarantees.
+     - Industry benchmarks, canonical language conventions, and production battle-testing.
+   - Contrast the proposed alternatives against the initial idea with explicit trade-off analyses (Pros vs. Cons, Complexity, Migration Effort).
+4. **Anticipate Second- and Third-Order Consequences**:
+   - Think beyond the immediate line of code: evaluate systemic impact on database durability (WAL, fsync, crash recovery), network transport overhead (gRPC, WebSockets, REST), wire serialization formats (Protobuf vs JSON), backward compatibility, and downstream client SDK stability.
+
+---
+
+## Pillar 2: Strict Language-Specific Coding Conventions & Naming Standards (Polyglot)
+
+All code written, reviewed, or recommended across any repository must strictly conform to official, canonical language-specific coding conventions, style guides, and naming standards. Agents must actively recommend and enforce these standards across every programming language:
+
+### 1. Swift (Apple Swift API Design Guidelines)
+- **Casing Conventions**:
+  - `UpperCamelCase` (`PascalCase`): Types (classes, structs, enums, actors, protocols, typealiases).
+  - `lowerCamelCase`: Variables, constants, properties, arguments, enum cases, and functions/methods.
+- **Clarity at the Point of Use**:
+  - Method and function names must read as grammatical English phrases at call sites (e.g., `polygon.contains(point:)`, `rect.intersects(geometry:)`).
+  - Omit needless words: omit words that duplicate type information when the argument type makes it clear.
+- **Argument Labels**:
+  - Omit the first argument label when the function name forms a natural grammatical phrase with the argument (e.g., `min(x, y)`). Otherwise, label arguments clearly (e.g., `tracks.insert(point, at: index)`).
+- **Boolean Properties & Methods**:
+  - Must read as assertions of fact or capability: prefix with `is`, `has`, `can`, or `should` (e.g., `isEmpty`, `hasPrefix`, `canExecute`, `shouldApply`).
+- **Protocols & Interfaces**:
+  - Nouns describing what something is (e.g., `Collection`, `SequencedRecord`).
+  - Suffixes describing capability: `-able`, `-ible`, `-ing` (e.g., `Equatable`, `Comparable`, `Sendable`, `SpatialIndexable`).
+- **Uniform Acronyms**:
+  - Acronyms must be uniformly uppercase or lowercase (e.g., `utf8URL`, `jsonString`, `parseJSON`, `crc64`).
+- **File & Module Organization**:
+  - One primary type per file; file name must match the type name exactly (`ReplicationBroadcaster.swift`).
+
+### 2. Go (Effective Go & Go Code Review Comments)
+- **Casing Conventions**:
+  - `MixedCaps` / `camelCase`: Unexported functions, variables, fields, and types.
+  - `PascalCase`: Exported functions, variables, fields, and types.
+  - **No Underscores**: Never use underscores (`snake_case`) in Go package names, variable names, or struct fields.
+- **Package Naming**:
+  - Short, single-word, all-lowercase nouns (`storage`, `wal`, `collections`).
+  - **Eliminate Stutter**: Package names must not repeat in identifier names (use `wal.Reader`, NOT `wal.WALReader`; `user.Service`, NOT `user.UserService`).
+- **Interfaces**:
+  - Single-method interfaces must be suffixed with `-er` (`Reader`, `Writer`, `Closer`, `Broadcaster`).
+- **Error Handling**:
+  - Errors must be returned as the last value; variable named `err`.
+  - Sentinel error variables prefixed with `Err` (e.g., `ErrNotFound`); custom error types suffixed with `Error` (e.g., `ValidationError`).
+- **Variable Scoping**:
+  - Short, compact names in narrow scopes (`i`, `r`, `buf`); descriptive names in wide or package scopes.
+
+### 3. Python (PEP 8, PEP 257, PEP 484)
+- **Casing Conventions**:
+  - `snake_case`: Functions, methods, variables, modules, and packages.
+  - `PascalCase` (CapWords): Classes and exceptions.
+  - `UPPER_SNAKE_CASE`: Module-level constants.
+- **Private & Internal Identifiers**:
+  - Single leading underscore (`_helper()`, `_buffer`) indicates non-public internal API.
+  - Double leading underscore (`__mangled`) reserved strictly for avoiding namespace collisions in class hierarchies.
+- **Type Annotations (PEP 484 / Modern Python)**:
+  - Mandatory type annotations for all function parameters, return values, and public class attributes (`int | None`, `tuple[str, ...]`).
+- **Docstrings (PEP 257)**:
+  - Formatted using standard Google or Sphinx format detailing parameters, return values, and raised exceptions.
+
+### 4. Rust (Rust API Guidelines & RFC 430)
+- **Casing Conventions**:
+  - `snake_case`: Functions, methods, variables, modules, and crates.
+  - `UpperCamelCase`: Types, structs, traits, enums, and enum variants.
+  - `SCREAMING_SNAKE_CASE`: Constants and static items.
+- **Conversion Methods**:
+  - `as_`: Cheap, borrowed conversion (`as_bytes()`, `as_ref()`).
+  - `to_`: Expensive, cloned/allocated conversion (`to_string()`).
+  - `into_`: Consuming, value-transfer conversion (`into_vec()`).
+- **Iterators**:
+  - Provide `iter()` (borrowed), `iter_mut()` (mutable borrowed), and `into_iter()` (consuming) where applicable.
+- **Error Types**:
+  - Custom error types implement `std::error::Error` and `std::fmt::Display`.
+
+### 5. TypeScript / JavaScript (Standard TS / Airbnb / Google TypeScript)
+- **Casing Conventions**:
+  - `camelCase`: Variables, functions, methods, and properties.
+  - `PascalCase`: Classes, interfaces, type aliases, and enums.
+  - `UPPER_SNAKE_CASE`: Global immutable constants.
+- **Interface Naming**:
+  - Never prefix interfaces with `I` (use `UserService`, never `IUserService`).
+- **Boolean Naming**:
+  - Prefix with `is`, `has`, `should`, or `can` (`isValid`, `hasAccess`).
+- **Strict Typing**:
+  - Enable strict compiler flags; avoid `any` in favor of `unknown` with runtime type guards.
+
+### 6. C++ (Google C++ Style Guide & C++ Core Guidelines)
+- **Casing Conventions**:
+  - `PascalCase`: Types, classes, structs, enums.
+  - `snake_case` or `camelCase`: Functions and methods, adhering strictly to existing codebase convention.
+  - `member_` (trailing underscore): Private class member variables.
+  - `kConstantName` or `UPPER_SNAKE_CASE`: Constants.
+- **Modern C++ Idioms**:
+  - RAII for all resource management; prefer smart pointers (`std::unique_ptr`, `std::shared_ptr`) over raw pointers.
+
+### 7. Java & Kotlin (Google Java Style & Official Kotlin Conventions)
+- **Casing Conventions**:
+  - `camelCase`: Methods, functions, properties, and local variables.
+  - `PascalCase`: Classes, interfaces, sealed hierarchies, and objects.
+  - `UPPER_SNAKE_CASE`: Compile-time constants.
+- **Kotlin Idiomatic Patterns**:
+  - Use `data class`, `sealed interface`, extension functions, and explicit nullability (`T?`) over Java patterns.
+
+### 8. Proactive Review & Correction Mandate
+- When reviewing, proposing, or refactoring code in any language, verify adherence to that language's canonical standards.
+- If user-provided code or proposals violate naming or formatting conventions, respectfully identify the deviation and propose the idiomatic correction.
+
+---
+
+## Pillar 3: Thorough & Concise Documentation & Design Diagrams
 
 Design documentation must provide complete clarity on architectural decisions, performance trade-offs, and structural relationships.
 
@@ -49,8 +176,6 @@ Design documentation must provide complete clarity on architectural decisions, p
      npx -y @mermaid-js/mermaid-cli -i <design-doc.md> -o /tmp/validate.svg
      ```
 
----
-
 4. **Meaningful In-Code Comments & API Docstrings**:
    - Every public, package, and internal symbol (protocols, classes, structs, actors, enums, functions, methods, properties, and initializers) must be accompanied by rich, meaningful documentation comments (`///` in Swift, `/** ... */` in TypeScript/Java/Kotlin, `// ...` in Go, `## ...` in Python).
    - Docstrings must clearly articulate:
@@ -62,9 +187,9 @@ Design documentation must provide complete clarity on architectural decisions, p
 
 ---
 
-## Pillar 2: Beautiful, Idiomatic, and Concise Code & Architectural Patterns
+## Pillar 4: Beautiful, Idiomatic, and Concise Code & Architectural Patterns
 
-Write modern, expressive, clean, and concise code conforming to the official idiomatic guidelines and style standards of the chosen programming language (e.g., Effective Go, Swift API Design Guidelines, PEP 8 / Modern Python 3.12+ Type Hints, Rust API Guidelines, TypeScript Strict Mode, Modern C++ Core Guidelines, Effective Kotlin/Java).
+Craft expressive, elegant, and maintainable software tailored to the idiomatic strengths of each target programming language:
 
 ### Polyglot Coding Principles
 1. **Strong Typing & Value Semantics**:
@@ -93,7 +218,7 @@ When porting code from Go (or other procedural/systems languages) to modern Swif
 
 ---
 
-## Pillar 3: Full Subsystem & Dependent Service Propagation
+## Pillar 5: Full Subsystem & Dependent Service Propagation
 
 Software architectures operate as interconnected ecosystems. When modifying core domain models, protocols, data contexts, ASTs, or state managers, actively propagate changes to all dependent layers:
 1. **API & Server Layers**: Update HTTP/REST endpoints, WebSocket channels, and gRPC service implementations. Ensure request/response schemas reflect updated contracts.
@@ -102,7 +227,7 @@ Software architectures operate as interconnected ecosystems. When modifying core
 
 ---
 
-## Pillar 4: High-Coverage Unit Testing (Minimally >95%)
+## Pillar 6: High-Coverage Unit Testing (Minimally >95%)
 
 All new components, features, algorithms, and bug fixes must be accompanied by comprehensive unit test suites:
 1. **Coverage Target**: Code coverage on new files and modified logic must minimally be greater than **95%** (target 95-100%).
@@ -112,7 +237,7 @@ All new components, features, algorithms, and bug fixes must be accompanied by c
 
 ---
 
-## Pillar 5: Mandatory Full Test Suite Re-Execution
+## Pillar 7: Mandatory Full Test Suite Re-Execution
 
 Never commit, conclude a milestone, or declare a task complete without executing the project's entire automated test suite:
 - **Execution**: Run the full repository test command (`swift test`, `go test ./...`, `pytest`, `npm test`, `cargo test`, etc.).
@@ -125,7 +250,7 @@ Never commit, conclude a milestone, or declare a task complete without executing
 
 ---
 
-## Pillar 6: GitHub Tagging & Semantic Versioning Recommendations
+## Pillar 8: GitHub Tagging & Semantic Versioning Recommendations
 
 The completion of an `implementation_plan.md` and its verified `walkthrough.md` serves as the primary milestone boundary and evaluation anchor for proposing a repository release tag on GitHub.
 
@@ -147,7 +272,7 @@ The completion of an `implementation_plan.md` and its verified `walkthrough.md` 
 
 ---
 
-## Pillar 7: Continuous Engineering History & Artifact Consolidation
+## Pillar 9: Continuous Engineering History & Artifact Consolidation
 
 Proactively maintain and consolidate the project's historical engineering record:
 1. **Never Discard Working Context**: Working memory artifacts (`implementation_plan.md` and `walkthrough.md`) document critical architectural decisions, alternatives evaluated, verification metrics, and benchmark results. Never discard or overwrite them without preserving their contents in the project's chronological archive.
@@ -162,7 +287,7 @@ Proactively maintain and consolidate the project's historical engineering record
 
 ---
 
-## Pillar 8: Common & Advanced Data Structures in Reusable Modules
+## Pillar 10: Common & Advanced Data Structures in Reusable Modules
 
 Abstract reusable, domain-agnostic data structures and high-performance algorithms out of domain-specific logic into shared collections/utilities packages (e.g., `Collections/` or `pkg/collections`):
 1. **Decouple Generic Algorithms from Domain Logic**:
@@ -175,6 +300,3 @@ Abstract reusable, domain-agnostic data structures and high-performance algorith
    - Use binary heaps / priority queues for event-time watermark alignment and priority agenda sorting.
 3. **Dedicated Unit Testing & Benchmarking**:
    - Every abstract data structure must have dedicated, isolated unit tests with exhaustive test coverage (>95%) and randomized stress tests verifying mathematical invariants under high-throughput conditions.
-
----
-*For the full global skill specification, see [~/.gemini/config/skills/core-engineering-standards/SKILL.md](file:///Users/globalflea/.gemini/config/skills/core-engineering-standards/SKILL.md).*
