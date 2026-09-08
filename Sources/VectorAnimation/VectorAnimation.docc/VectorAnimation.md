@@ -23,6 +23,7 @@ Rather than relying on frame-rate dependent discrete Euler integration, `VectorA
 - ``Easing``
 - ``EasingType``
 - ``TimingCurve``
+- ``AnimationConstants``
 
 ### Interpolation & Protocols
 - ``Interpolatable``

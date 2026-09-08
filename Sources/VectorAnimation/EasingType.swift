@@ -102,16 +102,21 @@ public enum TimingCurve: Sendable, Equatable, Hashable {
     case cubicOut
     case cubicInOut
     case exponential
-    case backIn(overshoot: Double = 1.70158)
-    case backOut(overshoot: Double = 1.70158)
-    case backInOut(overshoot: Double = 1.70158)
+    case backIn(overshoot: Double = AnimationConstants.defaultBackOvershoot)
+    case backOut(overshoot: Double = AnimationConstants.defaultBackOvershoot)
+    case backInOut(overshoot: Double = AnimationConstants.defaultBackOvershoot)
     case bounceIn
     case bounceOut
     case bounceInOut
-    case elasticIn(amplitude: Double = 1.0, period: Double = 0.3)
-    case elasticOut(amplitude: Double = 1.0, period: Double = 0.3)
-    case elasticInOut(amplitude: Double = 1.0, period: Double = 0.45)
-    case spring(mass: Double = 1.0, stiffness: Double = 100.0, damping: Double = 10.0, initialVelocity: Double = 0.0)
+    case elasticIn(amplitude: Double = AnimationConstants.defaultElasticAmplitude, period: Double = AnimationConstants.defaultElasticPeriod)
+    case elasticOut(amplitude: Double = AnimationConstants.defaultElasticAmplitude, period: Double = AnimationConstants.defaultElasticPeriod)
+    case elasticInOut(amplitude: Double = AnimationConstants.defaultElasticAmplitude, period: Double = AnimationConstants.defaultElasticInOutPeriod)
+    case spring(
+        mass: Double = AnimationConstants.defaultSpringMass,
+        stiffness: Double = AnimationConstants.defaultSpringStiffness,
+        damping: Double = AnimationConstants.defaultSpringDamping,
+        initialVelocity: Double = AnimationConstants.defaultSpringInitialVelocity
+    )
 
     /// Evaluates the timing curve or spring ODE at normalized elapsed time $t \in [0, 1]$.
     ///
@@ -170,7 +175,7 @@ public enum TimingCurve: Sendable, Equatable, Hashable {
             return 1.0 + inv * inv * ((s + 1.0) * inv + s)
 
         case .backInOut(let s):
-            let c2 = s * 1.525
+            let c2 = s * AnimationConstants.backInOutOvershootMultiplier
             if clampedT < 0.5 {
                 let p = 2.0 * clampedT
                 return (p * p * ((c2 + 1.0) * p - c2)) * 0.5
@@ -195,12 +200,12 @@ public enum TimingCurve: Sendable, Equatable, Hashable {
         case .elasticIn(let a, let p):
             if clampedT <= 0.0 { return 0.0 }
             if clampedT >= 1.0 { return 1.0 }
-            let period = (p == 0.0) ? 0.3 : p
+            let period = (p == 0.0) ? AnimationConstants.defaultElasticPeriod : p
             let s: Double
             if a < 1.0 {
                 s = period * 0.25
             } else {
-                s = period / (2.0 * .pi) * asin(min(1.0, 1.0 / max(1e-4, a)))
+                s = period / (2.0 * .pi) * asin(min(1.0, 1.0 / max(AnimationConstants.minimumSingularityGuard, a)))
             }
             let decay = pow(2.0, 10.0 * (clampedT - 1.0))
             return -a * decay * sin((clampedT - 1.0 - s) * (2.0 * .pi) / period)
@@ -208,12 +213,12 @@ public enum TimingCurve: Sendable, Equatable, Hashable {
         case .elasticOut(let a, let p):
             if clampedT <= 0.0 { return 0.0 }
             if clampedT >= 1.0 { return 1.0 }
-            let period = (p == 0.0) ? 0.3 : p
+            let period = (p == 0.0) ? AnimationConstants.defaultElasticPeriod : p
             let s: Double
             if a < 1.0 {
                 s = period * 0.25
             } else {
-                s = period / (2.0 * .pi) * asin(min(1.0, 1.0 / max(1e-4, a)))
+                s = period / (2.0 * .pi) * asin(min(1.0, 1.0 / max(AnimationConstants.minimumSingularityGuard, a)))
             }
             let decay = pow(2.0, -10.0 * clampedT)
             return a * decay * sin((clampedT - s) * (2.0 * .pi) / period) + 1.0
@@ -221,12 +226,12 @@ public enum TimingCurve: Sendable, Equatable, Hashable {
         case .elasticInOut(let a, let p):
             if clampedT <= 0.0 { return 0.0 }
             if clampedT >= 1.0 { return 1.0 }
-            let period = (p == 0.0) ? 0.45 : p
+            let period = (p == 0.0) ? AnimationConstants.defaultElasticInOutPeriod : p
             let s: Double
             if a < 1.0 {
                 s = period * 0.25
             } else {
-                s = period / (2.0 * .pi) * asin(min(1.0, 1.0 / max(1e-4, a)))
+                s = period / (2.0 * .pi) * asin(min(1.0, 1.0 / max(AnimationConstants.minimumSingularityGuard, a)))
             }
             if clampedT < 0.5 {
                 let decay = pow(2.0, 10.0 * (2.0 * clampedT - 1.0))
@@ -248,19 +253,20 @@ public enum TimingCurve: Sendable, Equatable, Hashable {
         damping: Double,
         initialVelocity: Double
     ) -> Double {
-        let m = max(1e-4, mass)
-        let k = max(1e-4, stiffness)
+        let m = max(AnimationConstants.minimumSingularityGuard, mass)
+        let k = max(AnimationConstants.minimumSingularityGuard, stiffness)
         let c = max(0.0, damping)
 
         let omega0 = sqrt(k / m)
         let zeta = c / (2.0 * sqrt(m * k))
+        let eps = AnimationConstants.precisionEpsilon
 
-        if zeta < 1.0 - 1e-5 {
+        if zeta < 1.0 - eps {
             let omegaD = omega0 * sqrt(1.0 - zeta * zeta)
             let decay = exp(-zeta * omega0 * t)
-            let coefficientB = (zeta * omega0 - initialVelocity) / max(1e-5, omegaD)
+            let coefficientB = (zeta * omega0 - initialVelocity) / max(eps, omegaD)
             return 1.0 - decay * (cos(omegaD * t) + coefficientB * sin(omegaD * t))
-        } else if abs(zeta - 1.0) <= 1e-5 {
+        } else if abs(zeta - 1.0) <= eps {
             let decay = exp(-omega0 * t)
             return 1.0 - decay * (1.0 + (omega0 - initialVelocity) * t)
         } else {
@@ -268,7 +274,7 @@ public enum TimingCurve: Sendable, Equatable, Hashable {
             let r1 = omega0 * (-zeta + discriminant)
             let r2 = omega0 * (-zeta - discriminant)
             let denom = r2 - r1
-            if abs(denom) < 1e-5 {
+            if abs(denom) < eps {
                 let decay = exp(-omega0 * t)
                 return 1.0 - decay * (1.0 + (omega0 - initialVelocity) * t)
             }

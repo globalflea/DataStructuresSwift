@@ -134,14 +134,14 @@ public enum Easing: Sendable {
             }
 
         case .backIn:
-            let s = 1.70158
+            let s = AnimationConstants.defaultBackOvershoot
             return t * t * ((s + 1.0) * t - s)
         case .backOut:
-            let s = 1.70158
+            let s = AnimationConstants.defaultBackOvershoot
             let f = t - 1.0
             return f * f * ((s + 1.0) * f + s) + 1.0
         case .backInOut:
-            let s = 1.70158 * 1.525
+            let s = AnimationConstants.compositeBackInOutOvershoot
             let scaled = t * 2.0
             if scaled < 1.0 {
                 return 0.5 * (scaled * scaled * ((s + 1.0) * scaled - s))
@@ -171,20 +171,20 @@ public enum Easing: Sendable {
     /// - Returns: The bounced progress value.
     /// - Complexity: $O(1)$ constant time.
     public static func bounceOut(_ t: Double) -> Double {
-        let n1 = 7.5625
-        let d1 = 2.75
+        let factor = AnimationConstants.bounceQuadraticFactor
+        let divisor = AnimationConstants.bounceTimeDivisor
 
-        if t < 1.0 / d1 {
-            return n1 * t * t
-        } else if t < 2.0 / d1 {
-            let p = t - 1.5 / d1
-            return n1 * p * p + 0.75
-        } else if t < 2.5 / d1 {
-            let p = t - 2.25 / d1
-            return n1 * p * p + 0.9375
+        if t < AnimationConstants.bounceStage1Numerator / divisor {
+            return factor * t * t
+        } else if t < AnimationConstants.bounceStage2Numerator / divisor {
+            let p = t - AnimationConstants.bounceShiftStage2Numerator / divisor
+            return factor * p * p + AnimationConstants.bounceOffsetStage2
+        } else if t < AnimationConstants.bounceStage3Numerator / divisor {
+            let p = t - AnimationConstants.bounceShiftStage3Numerator / divisor
+            return factor * p * p + AnimationConstants.bounceOffsetStage3
         } else {
-            let p = t - 2.625 / d1
-            return n1 * p * p + 0.984375
+            let p = t - AnimationConstants.bounceShiftStage4Numerator / divisor
+            return factor * p * p + AnimationConstants.bounceOffsetStage4
         }
     }
 }
