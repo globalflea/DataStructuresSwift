@@ -18,6 +18,17 @@ public struct Polygon2D: Sendable, Hashable, Equatable, Codable, CustomStringCon
         self.vertices = vertices
     }
 
+    @inlinable
+    public init(points: [Point2D]) {
+        self.vertices = points
+    }
+
+    @inlinable
+    public var points: [Point2D] {
+        get { vertices }
+        set { vertices = newValue }
+    }
+
     @inlinable public var count: Int { vertices.count }
     @inlinable public var isEmpty: Bool { vertices.isEmpty }
 
