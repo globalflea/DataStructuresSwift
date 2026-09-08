@@ -70,3 +70,17 @@ extension Rect2D: Interpolatable {
         )
     }
 }
+
+extension Transform2D: Interpolatable {
+    @inlinable
+    public func interpolated(to target: Transform2D, progress: Double) -> Transform2D {
+        Transform2D(
+            a: self.a.interpolated(to: target.a, progress: progress),
+            b: self.b.interpolated(to: target.b, progress: progress),
+            c: self.c.interpolated(to: target.c, progress: progress),
+            d: self.d.interpolated(to: target.d, progress: progress),
+            tx: self.tx.interpolated(to: target.tx, progress: progress),
+            ty: self.ty.interpolated(to: target.ty, progress: progress)
+        )
+    }
+}
