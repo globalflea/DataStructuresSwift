@@ -13,14 +13,36 @@ import Foundation
 public struct Polygon2D: Sendable, Hashable, Equatable, Codable, CustomStringConvertible {
     public var vertices: [Point2D]
 
+    public static let empty = Polygon2D(vertices: [])
+
     @inlinable
     public init(vertices: [Point2D]) {
         self.vertices = vertices
     }
 
     @inlinable
+    public init(_ vertices: Point2D...) {
+        self.init(vertices: vertices)
+    }
+
+    @inlinable
     public init(points: [Point2D]) {
         self.vertices = points
+    }
+
+    /// Creates a regular polygon with a given number of sides, radius, and center.
+    public static func regular(sides: Int, radius: Double, center: Point2D = .zero) -> Polygon2D {
+        precondition(sides >= 3, "A polygon must have at least 3 sides.")
+        let angleStep = (2.0 * .pi) / Double(sides)
+        var verts: [Point2D] = []
+        verts.reserveCapacity(sides)
+
+        for i in 0..<sides {
+            let angle = Double(i) * angleStep - .pi / 2.0
+            let pt = Point2D(x: center.x + radius * cos(angle), y: center.y + radius * sin(angle))
+            verts.append(pt)
+        }
+        return Polygon2D(vertices: verts)
     }
 
     @inlinable
@@ -318,6 +340,16 @@ public struct Polygon2D: Sendable, Hashable, Equatable, Codable, CustomStringCon
             s = e
         }
         return result
+    }
+
+    public func isApproximatelyEqual(to other: Polygon2D, tolerance: Double = 1e-9) -> Bool {
+        guard vertices.count == other.vertices.count else { return false }
+        for (p1, p2) in zip(vertices, other.vertices) {
+            if !p1.isApproximatelyEqual(to: p2, tolerance: tolerance) {
+                return false
+            }
+        }
+        return true
     }
 
     public var description: String {

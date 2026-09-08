@@ -166,6 +166,12 @@ public struct Line2D: Sendable, Hashable, Equatable, Codable, CustomStringConver
         end.isApproximatelyEqual(to: other.end, tolerance: tolerance)
     }
 
+    /// Axis-aligned bounding box encompassing both endpoints.
+    @inlinable
+    public var boundingBox: Rect2D {
+        Rect2D(p1: start, p2: end)
+    }
+
     public var description: String {
         "Line2D(\(start) -> \(end))"
     }

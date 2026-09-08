@@ -149,10 +149,19 @@ public struct QuadraticBezier2D: Sendable, Hashable, Equatable, Codable, CustomS
         return CubicBezier2D(p0: p0, p1: cp1, p2: cp2, p3: p2)
     }
 
+    public func isApproximatelyEqual(to other: QuadraticBezier2D, tolerance: Double = 1e-9) -> Bool {
+        p0.isApproximatelyEqual(to: other.p0, tolerance: tolerance) &&
+        p1.isApproximatelyEqual(to: other.p1, tolerance: tolerance) &&
+        p2.isApproximatelyEqual(to: other.p2, tolerance: tolerance)
+    }
+
     public var description: String {
         "QuadraticBezier2D(\(p0) -> \(p1) -> \(p2))"
     }
 }
+
+/// A cubic Bézier curve, aliased as `Bezier2D` for compatibility.
+public typealias Bezier2D = CubicBezier2D
 
 /// A 2D cubic Bézier curve defined by 4 control points (start, cp1, cp2, end).
 public struct CubicBezier2D: Sendable, Hashable, Equatable, Codable, CustomStringConvertible {
@@ -169,6 +178,12 @@ public struct CubicBezier2D: Sendable, Hashable, Equatable, Codable, CustomStrin
         self.p1 = p1
         self.p2 = p2
         self.p3 = p3
+    }
+
+    /// Degree elevation from quadratic control points.
+    public init(quadraticStart: Point2D, control: Point2D, end: Point2D) {
+        let q = QuadraticBezier2D(p0: quadraticStart, p1: control, p2: end)
+        self = q.elevateToCubic()
     }
 
     /// Evaluates the curve position at normalized progress $t \in [0, 1]$.
@@ -189,6 +204,12 @@ public struct CubicBezier2D: Sendable, Hashable, Equatable, Codable, CustomStrin
         )
     }
 
+    /// Evaluates the curve position at normalized progress $t \in [0, 1]$.
+    @inlinable
+    public func evaluate(at t: Double) -> Point2D {
+        point(at: t)
+    }
+
     /// Computes the first derivative vector $B'(t)$.
     @inlinable
     public func derivative(at t: Double) -> Vector2D {
@@ -204,9 +225,18 @@ public struct CubicBezier2D: Sendable, Hashable, Equatable, Codable, CustomStrin
     }
 
     /// Normalized unit tangent vector at parameter $t$.
-    @inlinable
     public func tangent(at t: Double) -> Vector2D {
-        derivative(at: t).normalized()
+        let d = derivative(at: t)
+        let mag = d.magnitude
+        if mag > 1e-9 {
+            return Vector2D(x: d.x / mag, y: d.y / mag)
+        }
+        let chord = p3 - p0
+        let chordMag = chord.magnitude
+        if chordMag > 1e-9 {
+            return Vector2D(x: chord.x / chordMag, y: chord.y / chordMag)
+        }
+        return Vector2D(x: 1, y: 0)
     }
 
     /// Normalized unit normal vector perpendicular to tangent at parameter $t$.
@@ -357,6 +387,18 @@ public struct CubicBezier2D: Sendable, Hashable, Equatable, Codable, CustomStrin
     @inlinable
     public func closestPoint(to target: Point2D, samples: Int) -> Point2D {
         point(at: closestParameter(to: target, samples: samples))
+    }
+
+    @inlinable
+    public func approximateLength(samples: Int = 32) -> Double {
+        arcLength(samples: samples)
+    }
+
+    public func isApproximatelyEqual(to other: CubicBezier2D, tolerance: Double = 1e-9) -> Bool {
+        p0.isApproximatelyEqual(to: other.p0, tolerance: tolerance) &&
+        p1.isApproximatelyEqual(to: other.p1, tolerance: tolerance) &&
+        p2.isApproximatelyEqual(to: other.p2, tolerance: tolerance) &&
+        p3.isApproximatelyEqual(to: other.p3, tolerance: tolerance)
     }
 
     public var description: String {
