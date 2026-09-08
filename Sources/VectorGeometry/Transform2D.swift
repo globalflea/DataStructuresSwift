@@ -146,6 +146,11 @@ public struct Transform2D: Sendable, Hashable, Equatable, Codable, CustomStringC
     }
 
     @inlinable
+    public func transform(_ point: Point2D) -> Point2D {
+        apply(to: point)
+    }
+
+    @inlinable
     public func apply(to vector: Vector2D) -> Vector2D {
         Vector2D(
             x: a * vector.x + c * vector.y,
@@ -165,6 +170,11 @@ public struct Transform2D: Sendable, Hashable, Equatable, Codable, CustomStringC
         let maxY = max(p1.y, p2.y, p3.y, p4.y)
 
         return Rect2D(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
+    }
+
+    @inlinable
+    public func transform(_ rect: Rect2D) -> Rect2D {
+        apply(to: rect)
     }
 
     public func isApproximatelyEqual(to other: Transform2D, tolerance: Double = 1e-9) -> Bool {
