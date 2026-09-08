@@ -19,6 +19,7 @@ public struct Polyline2D: Sendable, Hashable, Equatable, Codable, CustomStringCo
     }
 
     @inlinable public var count: Int { points.count }
+    @inlinable public var pointCount: Int { points.count }
     @inlinable public var isEmpty: Bool { points.isEmpty }
 
     /// Consecutive line segments forming the polyline.
@@ -35,6 +36,8 @@ public struct Polyline2D: Sendable, Hashable, Equatable, Codable, CustomStringCo
     public var length: Double {
         segments.reduce(0.0) { $0 + $1.length }
     }
+
+    @inlinable public var totalLength: Double { length }
 
     /// Axis-aligned bounding box tightly enclosing all vertices.
     public var boundingBox: Rect2D {
@@ -99,6 +102,18 @@ public struct Polyline2D: Sendable, Hashable, Equatable, Codable, CustomStringCo
     @inlinable
     public func distance(to point: Point2D) -> Double {
         closestPoint(to: point).distance(to: point)
+    }
+
+    /// Tests whether a point lies within `tolerance` distance of the polyline.
+    @inlinable
+    public func contains(point: Point2D, tolerance: Double = 5.0) -> Bool {
+        distance(to: point) <= tolerance
+    }
+
+    /// Returns the point located at a fractional distance `fraction` along the polyline (0.0 to 1.0).
+    @inlinable
+    public func point(atFraction fraction: Double) -> Point2D {
+        point(at: fraction)
     }
 
     /// Simplifies the polyline using the Ramer-Douglas-Peucker algorithm.

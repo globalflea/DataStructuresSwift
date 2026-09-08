@@ -103,6 +103,39 @@ public struct QuadraticBezier2D: Sendable, Hashable, Equatable, Codable, CustomS
         return Rect2D(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
     }
 
+    @inlinable
+    public func tightBoundingBox() -> Rect2D {
+        boundingBox
+    }
+
+    @inlinable
+    public func tangent(at t: Double) -> Vector2D {
+        derivative(at: t)
+    }
+
+    @inlinable
+    public func approximateLength(tolerance: Double = 1e-3) -> Double {
+        arcLength()
+    }
+
+    public func closestPoint(to target: Point2D, steps: Int = 20) -> BezierClosestPointResult {
+        var bestT = 0.0
+        var bestDist = Double.infinity
+        var bestPoint = p0
+
+        for i in 0...steps {
+            let t = Double(i) / Double(steps)
+            let pt = point(at: t)
+            let d = pt.distance(to: target)
+            if d < bestDist {
+                bestDist = d
+                bestT = t
+                bestPoint = pt
+            }
+        }
+        return BezierClosestPointResult(point: bestPoint, t: bestT, distance: bestDist)
+    }
+
     /// Degree elevation from quadratic to cubic Bézier without altering the curve's geometry.
     public func elevateToCubic() -> CubicBezier2D {
         let cp1 = Point2D(
@@ -292,12 +325,58 @@ public struct CubicBezier2D: Sendable, Hashable, Equatable, Codable, CustomStrin
         return t
     }
 
+    @inlinable
+    public func tightBoundingBox() -> Rect2D {
+        boundingBox
+    }
+
+    @inlinable
+    public func approximateLength(tolerance: Double = 1e-3) -> Double {
+        arcLength()
+    }
+
+    public func closestPoint(to target: Point2D, steps: Int = 30) -> BezierClosestPointResult {
+        var bestT = 0.0
+        var bestDist = Double.infinity
+        var bestPoint = p0
+
+        for i in 0...steps {
+            let t = Double(i) / Double(steps)
+            let pt = point(at: t)
+            let d = pt.distance(to: target)
+            if d < bestDist {
+                bestDist = d
+                bestT = t
+                bestPoint = pt
+            }
+        }
+        return BezierClosestPointResult(point: bestPoint, t: bestT, distance: bestDist)
+    }
+
     /// Closest point on the cubic Bézier curve to the target.
-    public func closestPoint(to target: Point2D, samples: Int = 20) -> Point2D {
+    @inlinable
+    public func closestPoint(to target: Point2D, samples: Int) -> Point2D {
         point(at: closestParameter(to: target, samples: samples))
     }
 
     public var description: String {
         "CubicBezier2D(\(p0) -> \(p1) -> \(p2) -> \(p3))"
     }
+}
+
+/// The result of projecting a point onto a Bézier curve.
+public struct BezierClosestPointResult: Sendable, Hashable, Equatable, Codable {
+    public var point: Point2D
+    public var t: Double
+    public var distance: Double
+
+    @inlinable
+    public init(point: Point2D, t: Double, distance: Double) {
+        self.point = point
+        self.t = t
+        self.distance = distance
+    }
+
+    @inlinable public var x: Double { point.x }
+    @inlinable public var y: Double { point.y }
 }
