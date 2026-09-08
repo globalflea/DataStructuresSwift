@@ -101,7 +101,9 @@ public struct Polyline2D: Sendable, Hashable, Equatable, Codable, CustomStringCo
     /// Computes the shortest distance from the given point to this polyline.
     @inlinable
     public func distance(to point: Point2D) -> Double {
-        closestPoint(to: point).distance(to: point)
+        guard !points.isEmpty else { return .infinity }
+        guard points.count >= 2 else { return points[0].distance(to: point) }
+        return closestPoint(to: point).distance(to: point)
     }
 
     /// Tests whether a point lies within `tolerance` distance of the polyline.

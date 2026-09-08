@@ -19,7 +19,9 @@ public enum Easing: Sendable {
 
     /// Evaluates an easing type at a given progress value in [0, 1].
     public static func evaluate(type: EasingType, progress: Double) -> Double {
-        let t = max(0.0, min(1.0, progress))
+        if progress <= 0.0 { return 0.0 }
+        if progress >= 1.0 { return 1.0 }
+        let t = progress
 
         switch type {
         case .linear:
