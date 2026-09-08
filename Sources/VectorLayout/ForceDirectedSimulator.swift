@@ -102,7 +102,16 @@ public final class ForceDirectedSimulator: @unchecked Sendable {
         self.configuration = configuration
     }
 
-    /// Advances the simulation by a single discrete time-step.
+    /// Advances the simulation by a single discrete time-step $\Delta t$.
+    ///
+    /// Executes the three-phase physical kinematics pipeline:
+    /// 1. Coulomb electrostatic pair repulsion: $\vec{F}_r = \frac{k_r^2}{d^2} \hat{r}$
+    /// 2. Hooke spring elastic edge attraction: $\vec{F}_a = -k_s (d - l_0) \hat{r}$
+    /// 3. Semi-implicit Euler-Cromer integration with velocity damping $\gamma$:
+    ///    $$\vec{v}_{t+\Delta t} = (\vec{v}_t + \frac{\vec{F}}{m} \Delta t) \cdot \gamma$$
+    ///    $$\vec{p}_{t+\Delta t} = \vec{p}_t + \vec{v}_{t+\Delta t} \Delta t$$
+    ///
+    /// - Complexity: $O(N^2 + E)$ for all-pairs force accumulation.
     public func step() {
         let nodeKeys = Array(nodes.keys)
         let n = nodeKeys.count
@@ -181,7 +190,10 @@ public final class ForceDirectedSimulator: @unchecked Sendable {
         }
     }
 
-    /// Runs the simulation for a given number of iterations.
+    /// Runs the simulation for a prescribed number of discrete equilibrium iterations.
+    ///
+    /// - Parameter iterations: The number of discrete integration steps to execute (default `50`).
+    /// - Complexity: $O(I \cdot (N^2 + E))$ where $I$ is iteration count.
     public func run(iterations: Int = 50) {
         for _ in 0..<iterations {
             step()

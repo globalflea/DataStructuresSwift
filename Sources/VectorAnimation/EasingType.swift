@@ -64,11 +64,20 @@ public enum EasingType: String, Sendable, Hashable, Equatable, CaseIterable, Cod
     case bounceInOut
 
     /// Evaluates the easing function at normalized elapsed time $t \in [0, 1]$.
+    ///
+    /// - Parameter t: Normalized time parameter in $[0, 1]$.
+    /// - Returns: Eased value, typically in $[0, 1]$ (except for elastic and back overshoots).
+    /// - Complexity: $O(1)$ constant time.
+    @inlinable
     public func evaluate(at t: Double) -> Double {
         Easing.evaluate(type: self, progress: t)
     }
 
     /// Resolves an easing type from a case-insensitive string, defaulting to `.cubicOut` (canonical default).
+    ///
+    /// - Parameter name: The name of the easing equation (e.g. `"easeInOutCubic"`, `"bounceOut"`).
+    /// - Returns: The matched `EasingType`, or `.cubicOut` if unmatched or nil.
+    /// - Complexity: $O(K)$ where $K = 31$ cases.
     public static func from(name: String?) -> EasingType {
         guard let n = name?.trimmingCharacters(in: .whitespacesAndNewlines), !n.isEmpty else {
             return .cubicOut
@@ -104,7 +113,15 @@ public enum TimingCurve: Sendable, Equatable, Hashable {
     case elasticInOut(amplitude: Double = 1.0, period: Double = 0.45)
     case spring(mass: Double = 1.0, stiffness: Double = 100.0, damping: Double = 10.0, initialVelocity: Double = 0.0)
 
-    /// Evaluates the easing function at normalized elapsed time $t \in [0, 1]$.
+    /// Evaluates the timing curve or spring ODE at normalized elapsed time $t \in [0, 1]$.
+    ///
+    /// For `.spring`, this evaluates the exact closed-form analytical solution of the
+    /// continuous Mass-Spring-Damper ODE:
+    /// $$m \ddot{x} + c \dot{x} + k x = 0$$
+    ///
+    /// - Parameter t: Normalized time parameter $t \in [0, 1]$.
+    /// - Returns: The evaluated animation progress factor.
+    /// - Complexity: $O(1)$ constant time with zero numerical drift.
     public func evaluate(at t: Double) -> Double {
         let clampedT = max(0.0, min(1.0, t))
         switch self {
@@ -264,6 +281,9 @@ public enum TimingCurve: Sendable, Equatable, Hashable {
     // MARK: - Combinators
 
     /// Reverses the timing curve: $f_{\text{rev}}(t) = 1 - f(1 - t)$.
+    ///
+    /// - Returns: A closure mapping normalized progress $t$ to its time-reversed value.
+    /// - Complexity: $O(1)$ constant time.
     public func reversed() -> @Sendable (Double) -> Double {
         return { t in
             1.0 - self.evaluate(at: 1.0 - t)
@@ -271,6 +291,12 @@ public enum TimingCurve: Sendable, Equatable, Hashable {
     }
 
     /// Reflects the timing curve symmetrically around $t = 0.5$.
+    ///
+    /// Creates a symmetric ping-pong curve where the first half scales $f(2t)$
+    /// and the second half reverses back smoothly.
+    ///
+    /// - Returns: A closure evaluating the symmetrically reflected curve.
+    /// - Complexity: $O(1)$ constant time.
     public func reflected() -> @Sendable (Double) -> Double {
         return { t in
             if t < 0.5 {
@@ -282,6 +308,14 @@ public enum TimingCurve: Sendable, Equatable, Hashable {
     }
 
     /// Clamps output between custom bounds $[min, max]$.
+    ///
+    /// Prevents overshoot values from exceeding prescribed visual limits.
+    ///
+    /// - Parameters:
+    ///   - min: Lower bounding limit (default `0.0`).
+    ///   - max: Upper bounding limit (default `1.0`).
+    /// - Returns: A closure evaluating the clamped curve.
+    /// - Complexity: $O(1)$ constant time.
     public func clamped(min: Double = 0.0, max: Double = 1.0) -> @Sendable (Double) -> Double {
         return { t in
             Swift.min(max, Swift.max(min, self.evaluate(at: t)))

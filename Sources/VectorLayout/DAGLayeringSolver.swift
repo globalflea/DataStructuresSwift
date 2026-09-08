@@ -23,8 +23,16 @@ public struct DAGEdge: Sendable, Hashable {
 /// Topological layering and rank assignment solver for Directed Acyclic Graphs.
 public enum DAGLayeringSolver {
 
-    /// Computes discrete topological layer ranks $[0, 1, 2, \dots]$ for all nodes.
-    /// Handles cycles gracefully by identifying and reversing feedback edges.
+    /// Computes discrete topological layer ranks $[0, 1, 2, \dots]$ for all nodes in the directed graph.
+    ///
+    /// Handles cyclic dependencies gracefully via Tarjan DFS back-edge detection, reversing
+    /// feedback arcs to produce a strictly acyclic DAG before calculating longest-path ranks.
+    ///
+    /// - Parameters:
+    ///   - nodeIds: Collection of unique node identifiers.
+    ///   - edges: Directed relationships $(u \to v)$ connecting nodes.
+    /// - Returns: A dictionary mapping node IDs to zero-based topological layer rank integers.
+    /// - Complexity: $O(|V| + |E|)$ linear time and space.
     public static func assignLayers(
         nodeIds: [String],
         edges: [DAGEdge]

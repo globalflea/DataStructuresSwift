@@ -12,12 +12,27 @@ import Foundation
 /// Mathematical easing function implementation supporting 31 Robert Penner equations.
 public enum Easing: Sendable {
 
+    /// Evaluates an easing curve at normalized progress parameter $t \in [0, 1]$.
+    ///
+    /// - Parameters:
+    ///   - type: The `EasingType` curve to evaluate.
+    ///   - t: The normalized time fraction, clamped between `0.0` and `1.0`.
+    /// - Returns: The interpolated progress value in $[0, 1]$ (or outside for overshoot curves).
+    /// - Complexity: $O(1)$ constant time with zero heap allocations.
     @inlinable
     public static func evaluate(_ type: EasingType, t: Double) -> Double {
         evaluate(type: type, progress: t)
     }
 
-    /// Evaluates an easing type at a given progress value in [0, 1].
+    /// Evaluates an easing curve at a given progress value in $[0, 1]$.
+    ///
+    /// Values outside $[0, 1]$ are clamped to boundary values $0.0$ and $1.0$.
+    ///
+    /// - Parameters:
+    ///   - type: The `EasingType` equation specification.
+    ///   - progress: The normalized elapsed progress fraction in $[0, 1]$.
+    /// - Returns: The resulting eased acceleration factor.
+    /// - Complexity: $O(1)$ constant time.
     public static func evaluate(type: EasingType, progress: Double) -> Double {
         if progress <= 0.0 { return 0.0 }
         if progress >= 1.0 { return 1.0 }
@@ -148,6 +163,13 @@ public enum Easing: Sendable {
         }
     }
 
+    /// Evaluates the Robert Penner bounce-out piecewise quadratic curve at time $t \in [0, 1]$.
+    ///
+    /// Simulates inelastic gravitational bounces with coefficient of restitution $e \approx 0.5$.
+    ///
+    /// - Parameter t: Normalized time parameter in $[0, 1]$.
+    /// - Returns: The bounced progress value.
+    /// - Complexity: $O(1)$ constant time.
     public static func bounceOut(_ t: Double) -> Double {
         let n1 = 7.5625
         let d1 = 2.75

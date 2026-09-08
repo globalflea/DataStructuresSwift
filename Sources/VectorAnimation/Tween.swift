@@ -49,6 +49,10 @@ public struct Tween<Value: Interpolatable>: Sendable {
     }
 
     /// Evaluates the normalized progress $p \in [0, 1]$ at a given absolute timestamp.
+    ///
+    /// - Parameter time: The absolute timestamp in milliseconds or seconds.
+    /// - Returns: The normalized progress in $[0, 1]$.
+    /// - Complexity: $O(1)$ constant time.
     @inlinable
     public func progress(at time: Double) -> Double {
         let elapsed = time - startTime - delay
@@ -58,12 +62,20 @@ public struct Tween<Value: Interpolatable>: Sendable {
     }
 
     /// Checks if the tween animation has finished.
+    ///
+    /// - Parameter time: The current absolute evaluation timestamp.
+    /// - Returns: `true` if `time >= startTime + delay + duration`.
+    /// - Complexity: $O(1)$ constant time.
     @inlinable
     public func isCompleted(at time: Double) -> Bool {
         time >= (startTime + delay + duration)
     }
 
     /// Evaluates the interpolated value at a given absolute timestamp.
+    ///
+    /// - Parameter time: The absolute timestamp.
+    /// - Returns: The interpolated value of type `Value`.
+    /// - Complexity: $O(1)$ constant time.
     public func value(at time: Double) -> Value {
         let rawProgress = progress(at: time)
         let easedProgress = easing.evaluate(at: rawProgress)
@@ -71,6 +83,10 @@ public struct Tween<Value: Interpolatable>: Sendable {
     }
 
     /// Evaluates the property value at the specified elapsed time in milliseconds.
+    ///
+    /// - Parameter elapsedMs: The elapsed time in milliseconds.
+    /// - Returns: The interpolated value.
+    /// - Complexity: $O(1)$ constant time.
     @inlinable
     public func sample(at elapsedMs: Double) -> Value {
         value(at: elapsedMs)
@@ -113,6 +129,10 @@ public struct KeyframeTrack<Value: Interpolatable>: Sendable {
     }
 
     /// Evaluates the track at a given timestamp or progress fraction.
+    ///
+    /// - Parameter time: The normalized time or timestamp to sample.
+    /// - Returns: The interpolated value at parameter `time`, or `nil` if track is empty.
+    /// - Complexity: $O(K)$ where $K$ is keyframe count (or $O(\log K)$ with binary search).
     public func sample(at time: Double) -> Value? {
         guard !keyframes.isEmpty else { return nil }
         guard keyframes.count > 1 else { return keyframes[0].value }
@@ -142,6 +162,19 @@ public struct KeyframeTrack<Value: Interpolatable>: Sendable {
 
 /// Calculates staggered delays for sequential visual element presentation.
 public enum AnimationStagger: Sendable {
+
+    /// Calculates the staggered animation start delay for an element at a given index.
+    ///
+    /// Equation:
+    /// $$\text{delay}(i) = \text{baseDelay} + i \cdot \text{staggerStep}$$
+    ///
+    /// - Parameters:
+    ///   - index: Zero-based element index in presentation sequence.
+    ///   - totalCount: Total count of items being presented.
+    ///   - baseDelay: Initial baseline delay offset in milliseconds (default `0.0`).
+    ///   - staggerStep: Incremental delay step between adjacent items in milliseconds (default `50.0`).
+    /// - Returns: Delay in milliseconds.
+    /// - Complexity: $O(1)$ constant time.
     public static func calculateDelay(
         index: Int,
         totalCount: Int,

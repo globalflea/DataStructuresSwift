@@ -87,7 +87,17 @@ public struct TidyTreeConfiguration: Sendable, Equatable {
 /// Buchheim-Walker $O(N)$ tidy tree layout solver.
 public enum TidyTreeSolver {
 
-    /// Executes Buchheim-Walker layout on the root node hierarchy and mutates `x` and `y` coordinates.
+    /// Executes Buchheim-Walker linear-time layout on the node hierarchy and mutates `x` and `y` coordinates.
+    ///
+    /// Guarantees the Reingold-Tilford aesthetic criteria in strictly linear $O(N)$ time:
+    /// - Children are spaced evenly and symmetrically centered beneath their parent.
+    /// - Subtree shapes are strictly isomorphic and invariant to global position.
+    /// - Minimum sibling and subtree separations are strictly maintained without overlap.
+    ///
+    /// - Parameters:
+    ///   - root: The root of the tree hierarchy.
+    ///   - configuration: Layout parameters including orientation, separations, and margins.
+    /// - Complexity: $O(N)$ strictly linear time and auxiliary space where $N$ is total node count.
     public static func layout<Data>(
         root: TidyTreeNode<Data>,
         configuration: TidyTreeConfiguration = .init()
