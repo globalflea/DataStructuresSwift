@@ -137,6 +137,12 @@ public struct Vector2D: Sendable, Hashable, Equatable, Codable, AdditiveArithmet
         return Vector2D(x: x * cosA - y * sinA, y: x * sinA + y * cosA)
     }
 
+    /// Compatibility alias for rotated(by:).
+    @inlinable
+    public func rotated(byAngle radians: Double) -> Vector2D {
+        rotated(by: radians)
+    }
+
     /// Linearly interpolates between this vector and `target` with factor `t` in [0, 1].
     @inlinable
     public func lerp(to target: Vector2D, t: Double) -> Vector2D {

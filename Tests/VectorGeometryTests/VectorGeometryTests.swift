@@ -90,6 +90,7 @@ struct VectorGeometryTests {
         #expect(v1.distanceSquared(to: v2) > 0)
         #expect(Vector2D(1, 0).angle == 0)
         #expect(Vector2D(1, 0).rotated(by: .pi / 2).isApproximatelyEqual(to: Vector2D(0, 1), tolerance: 1e-6))
+        #expect(Vector2D(1, 0).rotated(byAngle: .pi / 2).isApproximatelyEqual(to: Vector2D(0, 1), tolerance: 1e-6))
         #expect(Vector2D(0, 0).lerp(to: Vector2D(10, 10), t: 0.25) == Vector2D(2.5, 2.5))
         #expect(v1.description.contains("Vector2D"))
 
