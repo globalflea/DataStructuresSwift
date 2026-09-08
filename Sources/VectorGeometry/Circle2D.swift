@@ -91,6 +91,59 @@ public struct Circle2D: Sendable, Hashable, Equatable, Codable, CustomStringConv
     }
 
     public var description: String {
-        "Circle2D(c: \(center), r: \(String(format: "%.2f", radius)))"
+        "Circle2D(center: \(center), radius: \(radius))"
+    }
+}
+
+/// A 2D circular arc defined by center, radius, start angle, and end angle.
+public struct Arc2D: Sendable, Hashable, Equatable, Codable, CustomStringConvertible {
+    public var center: Point2D
+    public var radius: Double
+    public var startAngle: Double
+    public var endAngle: Double
+    public var isClockwise: Bool
+
+    public init(
+        center: Point2D = .zero,
+        radius: Double,
+        startAngle: Double,
+        endAngle: Double,
+        isClockwise: Bool = false
+    ) {
+        self.center = center
+        self.radius = Swift.max(0, radius)
+        self.startAngle = startAngle
+        self.endAngle = endAngle
+        self.isClockwise = isClockwise
+    }
+
+    @inlinable
+    public var startPoint: Point2D {
+        Point2D(x: center.x + radius * cos(startAngle), y: center.y + radius * sin(startAngle))
+    }
+
+    @inlinable
+    public var endPoint: Point2D {
+        Point2D(x: center.x + radius * cos(endAngle), y: center.y + radius * sin(endAngle))
+    }
+
+    @inlinable
+    public var sweepAngle: Double {
+        var diff = endAngle - startAngle
+        if isClockwise {
+            if diff > 0 { diff -= 2.0 * .pi }
+        } else {
+            if diff < 0 { diff += 2.0 * .pi }
+        }
+        return abs(diff)
+    }
+
+    @inlinable
+    public var arcLength: Double {
+        radius * sweepAngle
+    }
+
+    public var description: String {
+        "Arc2D(center: \(center), r: \(radius), start: \(startAngle), end: \(endAngle))"
     }
 }
