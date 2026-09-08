@@ -154,6 +154,17 @@ public struct Vector2D: Sendable, Hashable, Equatable, Codable, AdditiveArithmet
         abs(x - other.x) <= tolerance && abs(y - other.y) <= tolerance
     }
 
+    @inlinable
+    public init(_ point: Point2D) {
+        self.x = point.x
+        self.y = point.y
+    }
+
+    @inlinable
+    public var asPoint: Point2D {
+        Point2D(x: x, y: y)
+    }
+
     public var description: String {
         "Vector2D(\(String(format: "%.3f", x)), \(String(format: "%.3f", y)))"
     }
