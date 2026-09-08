@@ -30,6 +30,7 @@ public struct Polygon2D: Sendable, Hashable, Equatable, Codable, CustomStringCon
     }
 
     @inlinable public var count: Int { vertices.count }
+    @inlinable public var vertexCount: Int { vertices.count }
     @inlinable public var isEmpty: Bool { vertices.isEmpty }
 
     /// Bounding rectangle tightly enclosing all polygon vertices.
@@ -241,6 +242,58 @@ public struct Polygon2D: Sendable, Hashable, Equatable, Codable, CustomStringCon
         }
 
         return Polygon2D(vertices: output)
+    }
+
+    /// Clips this polygon against a convex clipping polygon using the Sutherland-Hodgman algorithm.
+    public func clipped(against clipPoly: Polygon2D) -> Polygon2D {
+        guard !isEmpty && !clipPoly.isEmpty else { return Polygon2D(vertices: []) }
+        var outputList = vertices
+
+        let clipCount = clipPoly.vertices.count
+        for i in 0..<clipCount {
+            let cp1 = clipPoly.vertices[i]
+            let cp2 = clipPoly.vertices[(i + 1) % clipCount]
+
+            let inputList = outputList
+            outputList.removeAll()
+            guard !inputList.isEmpty else { break }
+
+            var s = inputList[inputList.count - 1]
+            for e in inputList {
+                if isInsideEdge(p: e, cp1: cp1, cp2: cp2) {
+                    if isInsideEdge(p: s, cp1: cp1, cp2: cp2) {
+                        outputList.append(e)
+                    } else {
+                        outputList.append(polygonIntersection(cp1: cp1, cp2: cp2, s: s, e: e))
+                        outputList.append(e)
+                    }
+                } else if isInsideEdge(p: s, cp1: cp1, cp2: cp2) {
+                    outputList.append(polygonIntersection(cp1: cp1, cp2: cp2, s: s, e: e))
+                }
+                s = e
+            }
+        }
+        return Polygon2D(vertices: outputList)
+    }
+
+    private func isInsideEdge(p: Point2D, cp1: Point2D, cp2: Point2D) -> Bool {
+        isLeft(p0: cp1, p1: cp2, p2: p) >= 0
+    }
+
+    private func isLeft(p0: Point2D, p1: Point2D, p2: Point2D) -> Double {
+        (p1.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (p1.y - p0.y)
+    }
+
+    private func polygonIntersection(cp1: Point2D, cp2: Point2D, s: Point2D, e: Point2D) -> Point2D {
+        let dc = Point2D(x: cp1.x - cp2.x, y: cp1.y - cp2.y)
+        let dp = Point2D(x: s.x - e.x, y: s.y - e.y)
+        let n1 = cp1.x * cp2.y - cp1.y * cp2.x
+        let n2 = s.x * e.y - s.y * e.x
+        let n3 = 1.0 / (dc.x * dp.y - dc.y * dp.x)
+        return Point2D(
+            x: (n1 * dp.x - n2 * dc.x) * n3,
+            y: (n1 * dp.y - n2 * dc.y) * n3
+        )
     }
 
     private func clipEdge(
