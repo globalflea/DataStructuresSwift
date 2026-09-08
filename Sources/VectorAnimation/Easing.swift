@@ -12,6 +12,11 @@ import Foundation
 /// Mathematical easing function implementation supporting 31 Robert Penner equations.
 public enum Easing: Sendable {
 
+    @inlinable
+    public static func evaluate(_ type: EasingType, t: Double) -> Double {
+        evaluate(type: type, progress: t)
+    }
+
     /// Evaluates an easing type at a given progress value in [0, 1].
     public static func evaluate(type: EasingType, progress: Double) -> Double {
         let t = max(0.0, min(1.0, progress))
