@@ -49,6 +49,11 @@ public struct Transform2D: Sendable, Hashable, Equatable, Codable, CustomStringC
     }
 
     @inlinable
+    public static func scale(_ s: Double) -> Transform2D {
+        scale(x: s, y: s)
+    }
+
+    @inlinable
     public static func rotation(radians: Double) -> Transform2D {
         let cosA = cos(radians)
         let sinA = sin(radians)
