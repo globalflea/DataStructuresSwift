@@ -453,7 +453,8 @@ struct VectorGeometryTests {
         let t1 = Transform2D.translation(x: 5, y: 5)
         let t2 = Transform2D.scale(x: 2, y: 2)
         let tMul = t1 * t2
-        #expect(tMul.apply(to: Point2D(0, 0)) == Point2D(10, 10))
+        #expect(tMul.apply(to: Point2D(0, 0)) == Point2D(5, 5))
+        #expect(tMul.apply(to: Point2D(1, 1)) == Point2D(7, 7))
 
         let tDelta = Transform2D.identity.translatedBy(Vector2D(10, 20))
         #expect(tDelta.apply(to: Point2D.zero) == Point2D(10, 20))

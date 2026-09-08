@@ -55,9 +55,48 @@ public struct Transform2D: Sendable, Hashable, Equatable, Codable, CustomStringC
         return Transform2D(a: cosA, b: sinA, c: -sinA, d: cosA, tx: 0, ty: 0)
     }
 
+    @inlinable
+    public static func translation(dx: Double, dy: Double) -> Transform2D {
+        Transform2D(a: 1, b: 0, c: 0, d: 1, tx: dx, ty: dy)
+    }
+
+    @inlinable
+    public static func translation(_ vector: Vector2D) -> Transform2D {
+        translation(x: vector.x, y: vector.y)
+    }
+
+    @inlinable
+    public static func translation(_ offset: Point2D) -> Transform2D {
+        translation(x: offset.x, y: offset.y)
+    }
+
+    @inlinable
+    public static func scale(sx: Double, sy: Double) -> Transform2D {
+        scale(x: sx, y: sy)
+    }
+
+    @inlinable
+    public static func scale(sx: Double, sy: Double, around pivot: Point2D) -> Transform2D {
+        translation(x: -pivot.x, y: -pivot.y)
+            .concatenating(.scale(x: sx, y: sy))
+            .concatenating(.translation(x: pivot.x, y: pivot.y))
+    }
+
+    @inlinable
+    public static func rotation(radians: Double, around pivot: Point2D) -> Transform2D {
+        translation(x: -pivot.x, y: -pivot.y)
+            .concatenating(.rotation(radians: radians))
+            .concatenating(.translation(x: pivot.x, y: pivot.y))
+    }
+
+    @inlinable
+    public static func skew(xRadians: Double, yRadians: Double) -> Transform2D {
+        Transform2D(a: 1, b: tan(yRadians), c: tan(xRadians), d: 1, tx: 0, ty: 0)
+    }
+
     // MARK: - Concatenation & Arithmetic
 
-    /// Concatenates this transform with `other` (`self * other`).
+    /// Concatenates this transform with `other` (`self * other` in row-vector order, applying self then other).
     @inlinable
     public func concatenating(_ other: Transform2D) -> Transform2D {
         Transform2D(
@@ -72,7 +111,7 @@ public struct Transform2D: Sendable, Hashable, Equatable, Codable, CustomStringC
 
     @inlinable
     public static func * (lhs: Transform2D, rhs: Transform2D) -> Transform2D {
-        lhs.concatenating(rhs)
+        rhs.concatenating(lhs)
     }
 
     // MARK: - Fluently Chained Transforms
@@ -158,6 +197,21 @@ public struct Transform2D: Sendable, Hashable, Equatable, Codable, CustomStringC
         )
     }
 
+    @inlinable
+    public func transform(_ vector: Vector2D) -> Vector2D {
+        apply(to: vector)
+    }
+
+    @inlinable
+    public func apply(to line: Line2D) -> Line2D {
+        Line2D(start: apply(to: line.start), end: apply(to: line.end))
+    }
+
+    @inlinable
+    public func apply(to polygon: Polygon2D) -> Polygon2D {
+        Polygon2D(vertices: polygon.vertices.map { apply(to: $0) })
+    }
+
     public func apply(to rect: Rect2D) -> Rect2D {
         let p1 = apply(to: rect.topLeft)
         let p2 = apply(to: rect.topRight)
@@ -175,6 +229,20 @@ public struct Transform2D: Sendable, Hashable, Equatable, Codable, CustomStringC
     @inlinable
     public func transform(_ rect: Rect2D) -> Rect2D {
         apply(to: rect)
+    }
+
+    /// Decomposes the transform into its translation, scale, rotation (radians), and skew.
+    public func decompose() -> (translation: Vector2D, scale: Vector2D, rotation: Double, skew: Double) {
+        let translation = Vector2D(x: tx, y: ty)
+        let scaleX = (a * a + b * b).squareRoot()
+        var scaleY = (c * c + d * d).squareRoot()
+        let det = determinant
+        if det < 0 {
+            scaleY = -scaleY
+        }
+        let rotation = atan2(b, a)
+        let skew = atan2(a * c + b * d, scaleX * scaleX)
+        return (translation, Vector2D(x: scaleX, y: scaleY), rotation, skew)
     }
 
     public func isApproximatelyEqual(to other: Transform2D, tolerance: Double = 1e-9) -> Bool {
@@ -210,6 +278,11 @@ public struct Transform2D: Sendable, Hashable, Equatable, Codable, CustomStringC
     @inlinable
     public var cgTransform: CGAffineTransform {
         CGAffineTransform(a: a, b: b, c: c, d: d, tx: tx, ty: ty)
+    }
+
+    @inlinable
+    public var cgAffineTransform: CGAffineTransform {
+        cgTransform
     }
     #endif
 }
