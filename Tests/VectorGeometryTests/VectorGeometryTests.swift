@@ -523,5 +523,35 @@ struct VectorGeometryTests {
         #expect(sCurve.boundingBox.height > 0)
         #expect(sCurve.boundingBox.minY >= 0)
     }
+
+    @Test("Ellipse2D area, circumference, containment, and ray intersection")
+    func testEllipse2D() {
+        let e = Ellipse2D(center: Point2D(0, 0), radiusX: 10, radiusY: 5)
+        let eCircle = Ellipse2D(center: Point2D(5, 5), radius: 4)
+
+        #expect(e.area == .pi * 50.0)
+        #expect(e.circumference > 0)
+        #expect(e.contains(Point2D(0, 0)))
+        #expect(e.contains(Point2D(10, 0)))
+        #expect(!e.contains(Point2D(11, 0)))
+        #expect(!e.contains(Point2D(0, 6)))
+
+        let zeroE = Ellipse2D.zero
+        #expect(!zeroE.contains(Point2D(0, 0)))
+
+        let ptOnEdge = e.point(atAngle: 0)
+        #expect(ptOnEdge.isApproximatelyEqual(to: Point2D(10, 0)))
+
+        let bbox = e.boundingBox
+        #expect(bbox == Rect2D(x: -10, y: -5, width: 20, height: 10))
+
+        let hit = e.intersectionWithRay(to: Point2D(20, 0))
+        #expect(hit != nil)
+        #expect(hit!.isApproximatelyEqual(to: Point2D(10, 0)))
+
+        #expect(e.isApproximatelyEqual(to: Ellipse2D(center: Point2D(0, 0), radiusX: 10, radiusY: 5)))
+        #expect(!e.isApproximatelyEqual(to: eCircle))
+        #expect(e.description.contains("Ellipse2D"))
+    }
 }
 
