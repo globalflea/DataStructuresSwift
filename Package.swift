@@ -24,6 +24,21 @@ let package = Package(
             name: "DataStructures",
             targets: ["MeridianCore"]
         ),
+        // Pure 2D Vector Geometry & Mathematical Foundations
+        .library(
+            name: "VectorGeometry",
+            targets: ["VectorGeometry"]
+        ),
+        // Animation, Easing Equations & Interpolation Tweens
+        .library(
+            name: "VectorAnimation",
+            targets: ["VectorAnimation"]
+        ),
+        // Graph & Tree Auto-Layout Solvers
+        .library(
+            name: "VectorLayout",
+            targets: ["VectorLayout"]
+        ),
     ],
     dependencies: [],
     targets: [
@@ -45,6 +60,33 @@ let package = Package(
                 .enableExperimentalFeature("StrictConcurrency")
             ]
         ),
+        .target(
+            name: "VectorGeometry",
+            dependencies: [],
+            path: "Sources/VectorGeometry",
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency"),
+                .enableExperimentalFeature("StrictConcurrency")
+            ]
+        ),
+        .target(
+            name: "VectorAnimation",
+            dependencies: ["VectorGeometry"],
+            path: "Sources/VectorAnimation",
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency"),
+                .enableExperimentalFeature("StrictConcurrency")
+            ]
+        ),
+        .target(
+            name: "VectorLayout",
+            dependencies: ["VectorGeometry"],
+            path: "Sources/VectorLayout",
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency"),
+                .enableExperimentalFeature("StrictConcurrency")
+            ]
+        ),
         .testTarget(
             name: "MeridianCoreTests",
             dependencies: ["MeridianCore"],
@@ -54,6 +96,21 @@ let package = Package(
             name: "ResilienceTests",
             dependencies: ["MeridianCore", "Resilience"],
             path: "Tests/ResilienceTests"
+        ),
+        .testTarget(
+            name: "VectorGeometryTests",
+            dependencies: ["VectorGeometry"],
+            path: "Tests/VectorGeometryTests"
+        ),
+        .testTarget(
+            name: "VectorAnimationTests",
+            dependencies: ["VectorGeometry", "VectorAnimation"],
+            path: "Tests/VectorAnimationTests"
+        ),
+        .testTarget(
+            name: "VectorLayoutTests",
+            dependencies: ["VectorGeometry", "VectorLayout"],
+            path: "Tests/VectorLayoutTests"
         )
     ]
 )
