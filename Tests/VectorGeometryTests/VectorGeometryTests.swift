@@ -235,6 +235,21 @@ struct VectorGeometryTests {
         let rect = Rect2D(x: 2, y: -2, width: 6, height: 4)
         let hits = l1.intersects(rect: rect)
         #expect(hits.count == 2)
+        #expect(l1.intersections(with: rect).count == 2)
+
+        let l3 = Line2D(Point2D(0, 0), Point2D(0, 10))
+        #expect(l3.vector == Vector2D(0, 10))
+        #expect(l3.squaredLength == 100.0)
+        #expect(abs(l3.bearing - (.pi / 2)) < 1e-6)
+
+        // Line intersection with isSegment = false
+        let ray1 = Line2D(start: Point2D(0, 0), end: Point2D(2, 0))
+        let ray2 = Line2D(start: Point2D(5, -2), end: Point2D(5, -1))
+        #expect(ray1.intersection(with: ray2, isSegment: true) == nil)
+        let infiniteHit = ray1.intersection(with: ray2, isSegment: false)
+        #expect(infiniteHit != nil)
+        #expect(infiniteHit!.isApproximatelyEqual(to: Point2D(5, 0)))
+
         #expect(l1.description.contains("Line2D"))
     }
 

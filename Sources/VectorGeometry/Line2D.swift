@@ -28,8 +28,19 @@ public struct Line2D: Sendable, Hashable, Equatable, Codable, CustomStringConver
         self.end = Point2D(x: x2, y: y2)
     }
 
+    @inlinable
+    public init(_ start: Point2D, _ end: Point2D) {
+        self.start = start
+        self.end = end
+    }
+
     @inlinable public var dx: Double { end.x - start.x }
     @inlinable public var dy: Double { end.y - start.y }
+
+    @inlinable
+    public var vector: Vector2D {
+        end - start
+    }
 
     @inlinable
     public var length: Double {
@@ -42,8 +53,18 @@ public struct Line2D: Sendable, Hashable, Equatable, Codable, CustomStringConver
     }
 
     @inlinable
+    public var squaredLength: Double {
+        lengthSquared
+    }
+
+    @inlinable
     public var angle: Double {
         atan2(dy, dx)
+    }
+
+    @inlinable
+    public var bearing: Double {
+        vector.theta
     }
 
     @inlinable
@@ -92,8 +113,8 @@ public struct Line2D: Sendable, Hashable, Equatable, Codable, CustomStringConver
         closestPoint(to: point).distance(to: point)
     }
 
-    /// Computes the intersection point with another line segment, or `nil` if parallel or non-intersecting.
-    public func intersection(with other: Line2D) -> Point2D? {
+    /// Computes the intersection point with another line or segment, or `nil` if parallel or non-intersecting.
+    public func intersection(with other: Line2D, isSegment: Bool = true) -> Point2D? {
         let d = dx * other.dy - dy * other.dx
         guard abs(d) > 1e-9 else { return nil }
 
@@ -103,10 +124,13 @@ public struct Line2D: Sendable, Hashable, Equatable, Codable, CustomStringConver
         let t = (qpX * other.dy - qpY * other.dx) / d
         let u = (qpX * dy - qpY * dx) / d
 
-        guard t >= -1e-9 && t <= 1.0 + 1e-9 && u >= -1e-9 && u <= 1.0 + 1e-9 else {
-            return nil
+        if isSegment {
+            guard t >= -1e-9 && t <= 1.0 + 1e-9 && u >= -1e-9 && u <= 1.0 + 1e-9 else {
+                return nil
+            }
+            return point(at: max(0.0, min(1.0, t)))
         }
-        return point(at: max(0.0, min(1.0, t)))
+        return point(at: t)
     }
 
     /// Checks whether this line segment intersects another line segment.
@@ -131,6 +155,10 @@ public struct Line2D: Sendable, Hashable, Equatable, Codable, CustomStringConver
             }
         }
         return hits
+    }
+
+    public func intersections(with rect: Rect2D) -> [Point2D] {
+        intersects(rect: rect)
     }
 
     public func isApproximatelyEqual(to other: Line2D, tolerance: Double = 1e-9) -> Bool {
