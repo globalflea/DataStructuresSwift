@@ -67,6 +67,20 @@ public enum EasingType: String, Sendable, Hashable, Equatable, CaseIterable, Cod
     public func evaluate(at t: Double) -> Double {
         Easing.evaluate(type: self, progress: t)
     }
+
+    /// Resolves an easing type from a case-insensitive string, defaulting to `.cubicOut` (canonical default).
+    public static func from(name: String?) -> EasingType {
+        guard let n = name?.trimmingCharacters(in: .whitespacesAndNewlines), !n.isEmpty else {
+            return .cubicOut
+        }
+        let lower = n.lowercased()
+        for c in EasingType.allCases {
+            if c.rawValue.lowercased() == lower {
+                return c
+            }
+        }
+        return .cubicOut
+    }
 }
 
 /// Rich timing curve representation supporting parametric spring ODE dynamics and functional combinators.
