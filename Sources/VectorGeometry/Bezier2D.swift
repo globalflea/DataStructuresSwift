@@ -114,7 +114,12 @@ public struct QuadraticBezier2D: Sendable, Hashable, Equatable, Codable, CustomS
     }
 
     @inlinable
-    public func approximateLength(tolerance: Double = 1e-3) -> Double {
+    public func approximateLength(samples: Int = 16) -> Double {
+        arcLength(samples: samples)
+    }
+
+    @inlinable
+    public func approximateLength(tolerance: Double) -> Double {
         arcLength()
     }
 
@@ -361,7 +366,7 @@ public struct CubicBezier2D: Sendable, Hashable, Equatable, Codable, CustomStrin
     }
 
     @inlinable
-    public func approximateLength(tolerance: Double = 1e-3) -> Double {
+    public func approximateLength(tolerance: Double) -> Double {
         arcLength()
     }
 
