@@ -123,6 +123,12 @@ public struct Vector2D: Sendable, Hashable, Equatable, Codable, AdditiveArithmet
         atan2(y, x)
     }
 
+    /// Compatibility alias for angle in radians (-π to π).
+    @inlinable
+    public var theta: Double {
+        angle
+    }
+
     /// Returns the vector rotated by `radians` counter-clockwise.
     @inlinable
     public func rotated(by radians: Double) -> Vector2D {
