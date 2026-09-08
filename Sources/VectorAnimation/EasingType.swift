@@ -102,21 +102,23 @@ public enum TimingCurve: Sendable, Equatable, Hashable {
     case cubicOut
     case cubicInOut
     case exponential
-    case backIn(overshoot: Double = AnimationConstants.defaultBackOvershoot)
-    case backOut(overshoot: Double = AnimationConstants.defaultBackOvershoot)
-    case backInOut(overshoot: Double = AnimationConstants.defaultBackOvershoot)
+    /// Back curve with initial backward anticipation. Default overshoot $s = 1.70158$ (~10% pullback).
+    case backIn(overshoot: Double = 1.70158)
+    /// Back curve with terminal forward overshoot. Default overshoot $s = 1.70158$ (~10% overshoot).
+    case backOut(overshoot: Double = 1.70158)
+    /// Back curve with bilateral anticipation and overshoot ($s = 1.70158$).
+    case backInOut(overshoot: Double = 1.70158)
     case bounceIn
     case bounceOut
     case bounceInOut
-    case elasticIn(amplitude: Double = AnimationConstants.defaultElasticAmplitude, period: Double = AnimationConstants.defaultElasticPeriod)
-    case elasticOut(amplitude: Double = AnimationConstants.defaultElasticAmplitude, period: Double = AnimationConstants.defaultElasticPeriod)
-    case elasticInOut(amplitude: Double = AnimationConstants.defaultElasticAmplitude, period: Double = AnimationConstants.defaultElasticInOutPeriod)
-    case spring(
-        mass: Double = AnimationConstants.defaultSpringMass,
-        stiffness: Double = AnimationConstants.defaultSpringStiffness,
-        damping: Double = AnimationConstants.defaultSpringDamping,
-        initialVelocity: Double = AnimationConstants.defaultSpringInitialVelocity
-    )
+    /// Damped sinusoidal elastic curve with amplitude $a$ and oscillation period $p = 0.3$.
+    case elasticIn(amplitude: Double = 1.0, period: Double = 0.3)
+    /// Damped sinusoidal elastic curve with amplitude $a$ and oscillation period $p = 0.3$.
+    case elasticOut(amplitude: Double = 1.0, period: Double = 0.3)
+    /// Bilateral damped sinusoidal elastic curve with amplitude $a$ and period $p = 0.45$.
+    case elasticInOut(amplitude: Double = 1.0, period: Double = 0.45)
+    /// Second-order mass-spring-damper ODE harmonic oscillator ($m=1.0, k=100.0, c=10.0, v_0=0.0$).
+    case spring(mass: Double = 1.0, stiffness: Double = 100.0, damping: Double = 10.0, initialVelocity: Double = 0.0)
 
     /// Evaluates the timing curve or spring ODE at normalized elapsed time $t \in [0, 1]$.
     ///
@@ -175,7 +177,8 @@ public enum TimingCurve: Sendable, Equatable, Hashable {
             return 1.0 + inv * inv * ((s + 1.0) * inv + s)
 
         case .backInOut(let s):
-            let c2 = s * AnimationConstants.backInOutOvershootMultiplier
+            // Bilateral scaling factor 1.525 balances ease-in anticipation with ease-out settling:
+            let c2 = s * 1.525
             if clampedT < 0.5 {
                 let p = 2.0 * clampedT
                 return (p * p * ((c2 + 1.0) * p - c2)) * 0.5
@@ -200,12 +203,12 @@ public enum TimingCurve: Sendable, Equatable, Hashable {
         case .elasticIn(let a, let p):
             if clampedT <= 0.0 { return 0.0 }
             if clampedT >= 1.0 { return 1.0 }
-            let period = (p == 0.0) ? AnimationConstants.defaultElasticPeriod : p
+            let period = (p == 0.0) ? 0.3 : p
             let s: Double
             if a < 1.0 {
                 s = period * 0.25
             } else {
-                s = period / (2.0 * .pi) * asin(min(1.0, 1.0 / max(AnimationConstants.minimumSingularityGuard, a)))
+                s = period / (2.0 * .pi) * asin(min(1.0, 1.0 / max(1e-4, a)))
             }
             let decay = pow(2.0, 10.0 * (clampedT - 1.0))
             return -a * decay * sin((clampedT - 1.0 - s) * (2.0 * .pi) / period)
@@ -213,12 +216,12 @@ public enum TimingCurve: Sendable, Equatable, Hashable {
         case .elasticOut(let a, let p):
             if clampedT <= 0.0 { return 0.0 }
             if clampedT >= 1.0 { return 1.0 }
-            let period = (p == 0.0) ? AnimationConstants.defaultElasticPeriod : p
+            let period = (p == 0.0) ? 0.3 : p
             let s: Double
             if a < 1.0 {
                 s = period * 0.25
             } else {
-                s = period / (2.0 * .pi) * asin(min(1.0, 1.0 / max(AnimationConstants.minimumSingularityGuard, a)))
+                s = period / (2.0 * .pi) * asin(min(1.0, 1.0 / max(1e-4, a)))
             }
             let decay = pow(2.0, -10.0 * clampedT)
             return a * decay * sin((clampedT - s) * (2.0 * .pi) / period) + 1.0
@@ -226,12 +229,12 @@ public enum TimingCurve: Sendable, Equatable, Hashable {
         case .elasticInOut(let a, let p):
             if clampedT <= 0.0 { return 0.0 }
             if clampedT >= 1.0 { return 1.0 }
-            let period = (p == 0.0) ? AnimationConstants.defaultElasticInOutPeriod : p
+            let period = (p == 0.0) ? 0.45 : p
             let s: Double
             if a < 1.0 {
                 s = period * 0.25
             } else {
-                s = period / (2.0 * .pi) * asin(min(1.0, 1.0 / max(AnimationConstants.minimumSingularityGuard, a)))
+                s = period / (2.0 * .pi) * asin(min(1.0, 1.0 / max(1e-4, a)))
             }
             if clampedT < 0.5 {
                 let decay = pow(2.0, 10.0 * (2.0 * clampedT - 1.0))
@@ -253,23 +256,27 @@ public enum TimingCurve: Sendable, Equatable, Hashable {
         damping: Double,
         initialVelocity: Double
     ) -> Double {
-        let m = max(AnimationConstants.minimumSingularityGuard, mass)
-        let k = max(AnimationConstants.minimumSingularityGuard, stiffness)
+        // Singularity guards to prevent divide-by-zero or negative physical mass/stiffness
+        let m = max(1e-4, mass)
+        let k = max(1e-4, stiffness)
         let c = max(0.0, damping)
 
         let omega0 = sqrt(k / m)
         let zeta = c / (2.0 * sqrt(m * k))
-        let eps = AnimationConstants.precisionEpsilon
+        let eps = 1e-5
 
         if zeta < 1.0 - eps {
+            // Underdamped regime (zeta < 1): oscillatory ringing with damped frequency omegaD
             let omegaD = omega0 * sqrt(1.0 - zeta * zeta)
             let decay = exp(-zeta * omega0 * t)
             let coefficientB = (zeta * omega0 - initialVelocity) / max(eps, omegaD)
             return 1.0 - decay * (cos(omegaD * t) + coefficientB * sin(omegaD * t))
         } else if abs(zeta - 1.0) <= eps {
+            // Critically damped regime (zeta = 1): fastest exponential return without overshoot
             let decay = exp(-omega0 * t)
             return 1.0 - decay * (1.0 + (omega0 - initialVelocity) * t)
         } else {
+            // Overdamped regime (zeta > 1): two distinct real exponential decay modes
             let discriminant = sqrt(zeta * zeta - 1.0)
             let r1 = omega0 * (-zeta + discriminant)
             let r2 = omega0 * (-zeta - discriminant)
