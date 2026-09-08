@@ -53,6 +53,7 @@ public struct Polygon2D: Sendable, Hashable, Equatable, Codable, CustomStringCon
 
     @inlinable public var count: Int { vertices.count }
     @inlinable public var vertexCount: Int { vertices.count }
+    @inlinable public var pointCount: Int { vertices.count }
     @inlinable public var isEmpty: Bool { vertices.isEmpty }
 
     /// Bounding rectangle tightly enclosing all polygon vertices.

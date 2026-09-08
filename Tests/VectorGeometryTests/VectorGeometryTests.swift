@@ -553,5 +553,180 @@ struct VectorGeometryTests {
         #expect(!e.isApproximatelyEqual(to: eCircle))
         #expect(e.description.contains("Ellipse2D"))
     }
+
+    @Test("Comprehensive VectorGeometry full branch coverage")
+    func testComprehensiveCoverage() {
+        // Point2D & Vector2D conversions
+        let v = Vector2D(x: 3, y: 4)
+        let p = Point2D(v)
+        #expect(p.x == 3 && p.y == 4)
+        #expect(p.asVector == v)
+        let vBack = Vector2D(p)
+        #expect(vBack.x == 3 && vBack.y == 4)
+        #expect(vBack.asPoint == p)
+
+        // Arc2D
+        let arcCCW = Arc2D(center: Point2D(0, 0), radius: 10, startAngle: 0, endAngle: .pi / 2, isClockwise: false)
+        #expect(arcCCW.startPoint.isApproximatelyEqual(to: Point2D(10, 0)))
+        #expect(arcCCW.endPoint.isApproximatelyEqual(to: Point2D(0, 10)))
+        #expect(arcCCW.sweepAngle.isApproximatelyEqual(to: .pi / 2))
+        #expect(arcCCW.arcLength.isApproximatelyEqual(to: 5.0 * .pi))
+        #expect(arcCCW.description.contains("Arc2D"))
+
+        let arcCW = Arc2D(center: Point2D(0, 0), radius: 10, startAngle: .pi / 2, endAngle: 0, isClockwise: true)
+        #expect(arcCW.sweepAngle.isApproximatelyEqual(to: .pi / 2))
+
+        let arcCW2 = Arc2D(center: Point2D(0, 0), radius: 10, startAngle: 0, endAngle: .pi / 2, isClockwise: true)
+        #expect(arcCW2.sweepAngle.isApproximatelyEqual(to: 1.5 * .pi))
+
+        let arcCCW2 = Arc2D(center: Point2D(0, 0), radius: 10, startAngle: .pi / 2, endAngle: 0, isClockwise: false)
+        #expect(arcCCW2.sweepAngle.isApproximatelyEqual(to: 1.5 * .pi))
+
+        // Polyline2D pointCount, totalLength, contains, point(atFraction:), RDP split
+        let poly = Polyline2D(points: [Point2D(0, 0), Point2D(10, 0), Point2D(10, 10)])
+        #expect(poly.pointCount == 3)
+        #expect(poly.totalLength == 20.0)
+        #expect(poly.contains(point: Point2D(5, 1), tolerance: 2.0))
+        #expect(!poly.contains(point: Point2D(5, 10), tolerance: 2.0))
+        #expect(poly.point(atFraction: 0.5) == poly.point(at: 0.5))
+
+        // RDP recursion with split
+        let zigZag = Polyline2D(points: [
+            Point2D(0, 0), Point2D(5, 20), Point2D(10, 0), Point2D(15, 20), Point2D(20, 0)
+        ])
+        let simplifiedZigZag = zigZag.simplified(tolerance: 5.0)
+        #expect(simplifiedZigZag.pointCount >= 3)
+
+        // Polygon2D regular, empty, variadic, pointCount, clipped against polygon, isApproximatelyEqual
+        let emptyPoly = Polygon2D.empty
+        #expect(emptyPoly.isEmpty)
+        #expect(emptyPoly.pointCount == 0)
+
+        let regHex = Polygon2D.regular(sides: 6, radius: 10)
+        #expect(regHex.pointCount == 6)
+        #expect(regHex.area > 0)
+
+        let variadicPoly = Polygon2D(Point2D(0, 0), Point2D(10, 0), Point2D(5, 10))
+        #expect(variadicPoly.pointCount == 3)
+        #expect(variadicPoly.isApproximatelyEqual(to: Polygon2D(points: [Point2D(0, 0), Point2D(10, 0), Point2D(5, 10)])))
+        #expect(!variadicPoly.isApproximatelyEqual(to: Polygon2D(Point2D(0, 0), Point2D(10, 0))))
+
+        // Polygon clipped against convex polygon
+        let polyToClip = Polygon2D(points: [Point2D(-5, -5), Point2D(15, -5), Point2D(15, 15), Point2D(-5, 15)])
+        let clipConvex = Polygon2D(points: [Point2D(0, 0), Point2D(10, 0), Point2D(10, 10), Point2D(0, 10)])
+        let clippedPoly = polyToClip.clipped(against: clipConvex)
+        #expect(clippedPoly.area.isApproximatelyEqual(to: 100.0, tolerance: 1e-4))
+        #expect(emptyPoly.clipped(against: clipConvex).isEmpty)
+
+        // Transform2D transform(point:), transform(vector:), apply(line:), apply(polygon:), transform(rect:), decompose()
+        let t = Transform2D.scale(x: 2, y: 3).translatedBy(x: 10, y: 20)
+        #expect(t.transform(Point2D(1, 1)) == t.apply(to: Point2D(1, 1)))
+        #expect(t.transform(Vector2D(1, 1)) == t.apply(to: Vector2D(1, 1)))
+        let lineT = t.apply(to: Line2D(x1: 0, y1: 0, x2: 10, y2: 10))
+        #expect(lineT.start == t.apply(to: Point2D(0, 0)))
+        let polyT = t.apply(to: Polygon2D(Point2D(0, 0), Point2D(5, 5), Point2D(10, 0)))
+        #expect(polyT.vertices.count == 3)
+        let rectT = t.transform(Rect2D(x: 0, y: 0, width: 10, height: 10))
+        #expect(rectT == t.apply(to: Rect2D(x: 0, y: 0, width: 10, height: 10)))
+
+        let decomp = t.decompose()
+        #expect(decomp.translation.x == 10 && decomp.translation.y == 20)
+        #expect(decomp.scale.x.isApproximatelyEqual(to: 2.0, tolerance: 1e-4))
+        #expect(decomp.scale.y.isApproximatelyEqual(to: 3.0, tolerance: 1e-4))
+
+        let negScaleT = Transform2D.scale(x: 1, y: -1)
+        let negDecomp = negScaleT.decompose()
+        #expect(negDecomp.scale.y < 0)
+
+        // Additional Transform2D static factories
+        let tTransDxDy = Transform2D.translation(dx: 15, dy: 25)
+        #expect(tTransDxDy.tx == 15 && tTransDxDy.ty == 25)
+        let tTransVec = Transform2D.translation(Vector2D(x: 8, y: 9))
+        #expect(tTransVec.tx == 8 && tTransVec.ty == 9)
+        let tTransPt = Transform2D.translation(Point2D(11, 12))
+        #expect(tTransPt.tx == 11 && tTransPt.ty == 12)
+
+        let tScaleSxSy = Transform2D.scale(sx: 1.5, sy: 2.5)
+        #expect(tScaleSxSy.a == 1.5 && tScaleSxSy.d == 2.5)
+
+        let tScaleAround = Transform2D.scale(sx: 2.0, sy: 2.0, around: Point2D(10, 10))
+        #expect(tScaleAround.apply(to: Point2D(10, 10)).isApproximatelyEqual(to: Point2D(10, 10)))
+        #expect(tScaleAround.apply(to: Point2D(15, 10)).isApproximatelyEqual(to: Point2D(20, 10)))
+
+        let tRotAround = Transform2D.rotation(radians: .pi, around: Point2D(5, 5))
+        #expect(tRotAround.apply(to: Point2D(5, 5)).isApproximatelyEqual(to: Point2D(5, 5)))
+        #expect(tRotAround.apply(to: Point2D(7, 5)).isApproximatelyEqual(to: Point2D(3, 5)))
+
+        let tSkew = Transform2D.skew(xRadians: 0.1, yRadians: 0.2)
+        #expect(tSkew.b.isApproximatelyEqual(to: tan(0.2)))
+        #expect(tSkew.c.isApproximatelyEqual(to: tan(0.1)))
+
+        #if canImport(CoreGraphics)
+        #expect(t.cgAffineTransform == t.cgTransform)
+        #endif
+
+        // Bezier2D quadratic elevation, length, tightBoundingBox, tangent, cubic closestParameter, length, isApprox
+        let q = QuadraticBezier2D(p0: Point2D(0, 0), p1: Point2D(10, 20), p2: Point2D(20, 0))
+        #expect(q.isApproximatelyEqual(to: QuadraticBezier2D(p0: Point2D(0, 0), p1: Point2D(10, 20), p2: Point2D(20, 0))))
+        #expect(!q.isApproximatelyEqual(to: QuadraticBezier2D(p0: Point2D(1, 0), p1: Point2D(10, 20), p2: Point2D(20, 0))))
+        #expect(q.tightBoundingBox() == q.boundingBox)
+        #expect(q.approximateLength(samples: 16) > 0)
+        #expect(q.approximateLength(tolerance: 1e-3) > 0)
+        #expect(q.tangent(at: 0.5).magnitude > 0)
+        #expect(q.description.contains("QuadraticBezier2D"))
+        #expect(QuadraticBezier2D.zero.p0 == .zero)
+
+        let qSplit = q.split(at: 0.5)
+        #expect(qSplit.left.p0 == q.p0)
+        #expect(qSplit.right.p2 == q.p2)
+        let qClosest = q.closestPoint(to: Point2D(10, 10), steps: 20)
+        #expect(qClosest.point.x >= 0)
+
+        // S-curve cubic to test multiple derivative extrema
+        let sCurve = CubicBezier2D(
+            p0: Point2D(0, 0),
+            p1: Point2D(10, 50),
+            p2: Point2D(20, -50),
+            p3: Point2D(30, 0)
+        )
+        let sBox = sCurve.boundingBox
+        #expect(sBox.minY < 0 && sBox.maxY > 0)
+
+        let elevated = q.elevateToCubic()
+        #expect(elevated.p0 == q.p0)
+        #expect(elevated.p3 == q.p2)
+
+        let cubic = CubicBezier2D(quadraticStart: Point2D(0, 0), control: Point2D(10, 20), end: Point2D(20, 0))
+        #expect(cubic.tightBoundingBox() == cubic.boundingBox)
+        #expect(cubic.approximateLength(samples: 32) > 0)
+        #expect(cubic.approximateLength(tolerance: 1e-3) > 0)
+        #expect(cubic.isApproximatelyEqual(to: cubic))
+        #expect(cubic.description.contains("CubicBezier2D"))
+        #expect(CubicBezier2D.zero.p0 == .zero)
+        #expect(cubic.evaluate(at: 0.5) == cubic.point(at: 0.5))
+
+        let tanCubic = cubic.tangent(at: 0.5)
+        let normCubic = cubic.normal(at: 0.5)
+        #expect(tanCubic.dot(normCubic).isApproximatelyEqual(to: 0.0, tolerance: 1e-5))
+
+        // Degenerate tangent fallbacks
+        let degen1 = CubicBezier2D(p0: .zero, p1: .zero, p2: .zero, p3: Point2D(10, 0))
+        #expect(degen1.tangent(at: 0.0).magnitude.isApproximatelyEqual(to: 1.0))
+        let degen2 = CubicBezier2D(p0: .zero, p1: .zero, p2: .zero, p3: .zero)
+        #expect(degen2.tangent(at: 0.0) == Vector2D(x: 1, y: 0))
+
+        let cubicSplit = cubic.split(at: 0.5)
+        #expect(cubicSplit.left.p0 == cubic.p0)
+        #expect(cubicSplit.right.p3 == cubic.p3)
+
+        let param = cubic.closestParameter(to: Point2D(10, 10), samples: 20)
+        #expect(param > 0 && param < 1)
+        let cpBySamples = cubic.closestPoint(to: Point2D(10, 10), samples: 20)
+        #expect(cpBySamples.distance(to: Point2D(10, 10)) >= 0)
+
+        let projRes = cubic.closestPoint(to: Point2D(10, 10), steps: 20)
+        #expect(projRes.x == projRes.point.x)
+        #expect(projRes.y == projRes.point.y)
+    }
 }
 
