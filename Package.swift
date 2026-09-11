@@ -39,6 +39,11 @@ let package = Package(
             name: "VectorLayout",
             targets: ["VectorLayout"]
         ),
+        // Generic Reusable SwiftUI Components & Design System
+        .library(
+            name: "MeridianUI",
+            targets: ["MeridianUI"]
+        ),
     ],
     dependencies: [],
     targets: [
@@ -87,6 +92,15 @@ let package = Package(
                 .enableExperimentalFeature("StrictConcurrency")
             ]
         ),
+        .target(
+            name: "MeridianUI",
+            dependencies: ["VectorGeometry"],
+            path: "Sources/MeridianUI",
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency"),
+                .enableExperimentalFeature("StrictConcurrency")
+            ]
+        ),
         .testTarget(
             name: "MeridianCoreTests",
             dependencies: ["MeridianCore"],
@@ -111,6 +125,11 @@ let package = Package(
             name: "VectorLayoutTests",
             dependencies: ["VectorGeometry", "VectorLayout"],
             path: "Tests/VectorLayoutTests"
+        ),
+        .testTarget(
+            name: "MeridianUITests",
+            dependencies: ["MeridianUI"],
+            path: "Tests/MeridianUITests"
         )
     ]
 )
