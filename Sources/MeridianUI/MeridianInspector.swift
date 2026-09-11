@@ -41,6 +41,7 @@ public struct MeridianInspector<Content: View>: View {
     public let minWidth: CGFloat
     public let maxWidth: CGFloat
     public let edge: MeridianInspectorEdge
+    public let showsCollapseButton: Bool
     public let content: (String) -> Content
 
     @State private var isDraggingResizer: Bool = false
@@ -56,6 +57,7 @@ public struct MeridianInspector<Content: View>: View {
     ///   - minWidth: Minimum allowed panel width (default 240pt).
     ///   - maxWidth: Maximum allowed panel width (default 600pt).
     ///   - edge: Whether the panel docks on the `.trailing` (right) or `.leading` (left) edge.
+    ///   - showsCollapseButton: Whether to display a collapse button inside the inspector header bar (default `false`).
     ///   - content: ViewBuilder that returns the body for the currently selected tab ID.
     public init(
         tabs: [MeridianInspectorTab],
@@ -65,6 +67,7 @@ public struct MeridianInspector<Content: View>: View {
         minWidth: CGFloat = 240,
         maxWidth: CGFloat = 600,
         edge: MeridianInspectorEdge = .trailing,
+        showsCollapseButton: Bool = false,
         @ViewBuilder content: @escaping (String) -> Content
     ) {
         self.tabs = tabs
@@ -74,6 +77,7 @@ public struct MeridianInspector<Content: View>: View {
         self.minWidth = minWidth
         self.maxWidth = maxWidth
         self.edge = edge
+        self.showsCollapseButton = showsCollapseButton
         self.content = content
     }
 
@@ -131,20 +135,22 @@ public struct MeridianInspector<Content: View>: View {
                 .buttonStyle(.plain)
             }
 
-            // Collapse button
-            Button {
-                withAnimation {
-                    isCollapsed.toggle()
+            if showsCollapseButton {
+                // Optional collapse button (omitted by default when main app navigation provides the toggle)
+                Button {
+                    withAnimation {
+                        isCollapsed.toggle()
+                    }
+                } label: {
+                    Image(systemName: edge == .trailing ? "sidebar.right" : "sidebar.left")
+                        .font(.system(size: 12))
+                        .foregroundColor(Color.white.opacity(0.6))
+                        .padding(.horizontal, 8)
+                        .frame(height: 38)
                 }
-            } label: {
-                Image(systemName: edge == .trailing ? "sidebar.right" : "sidebar.left")
-                    .font(.system(size: 12))
-                    .foregroundColor(Color.white.opacity(0.6))
-                    .padding(.horizontal, 8)
-                    .frame(height: 38)
+                .buttonStyle(.plain)
+                .help(isCollapsed ? "Expand Inspector" : "Collapse Inspector")
             }
-            .buttonStyle(.plain)
-            .help(isCollapsed ? "Expand Inspector" : "Collapse Inspector")
         }
         .background(Color(nsColorOrUIColor: 0x181B22))
         .overlay(
