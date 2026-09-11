@@ -11,7 +11,7 @@ These rules are unconditionally active for all development, refactoring, and fea
 5. **Full Subsystem & Dependent Service Propagation**
 6. **High-Coverage Unit Testing (Minimally >95%)**
 7. **Mandatory Full Test Suite Re-Execution**
-8. **GitHub Tagging & Semantic Versioning Recommendations**
+8. **GitHub Issue Tracking, Tagging & Semantic Versioning Recommendations**
 9. **Continuous Engineering History & Artifact Consolidation**
 10. **Common & Advanced Data Structures in Reusable Modules**
 
@@ -38,6 +38,12 @@ Every engineer and AI agent operating under this protocol must maintain the high
    - Contrast the proposed alternatives against the initial idea with explicit trade-off analyses (Pros vs. Cons, Complexity, Migration Effort).
 4. **Anticipate Second- and Third-Order Consequences**:
    - Think beyond the immediate line of code: evaluate systemic impact on database durability (WAL, fsync, crash recovery), network transport overhead (gRPC, WebSockets, REST), wire serialization formats (Protobuf vs JSON), backward compatibility, and downstream client SDK stability.
+5. **Careful, Analytical Porting & Active Bug Elimination (Zero Bug Transplantation)**:
+   - Never mechanically translate or copy logic line-by-line without rigorous first-principles scrutiny.
+   - If a bug, design flaw, or edge-case failure exists in reference code, do not port it over; fix it at the root using type-safe, idiomatic patterns.
+6. **Mandatory GitHub Issue Registration for All User-Discovered Bugs**:
+   - Every bug, visual glitch, performance degradation, or logical defect identified or reported by the user must immediately be created and tracked as a formal GitHub Issue on GitHub.com.
+   - Never address a user-discovered bug silently or without formal traceability. Every user-reported bug must be accompanied by an exhaustive first-principles Root Cause Analysis (RCA), a sound architectural resolution, comprehensive unit tests, and direct commit traceability as specified in Pillar 8.
 
 ---
 
@@ -250,11 +256,48 @@ Never commit, conclude a milestone, or declare a task complete without executing
 
 ---
 
-## Pillar 8: GitHub Tagging & Semantic Versioning Recommendations
+## Pillar 8: GitHub Issue Tracking, Tagging & Semantic Versioning Recommendations
 
-The completion of an `implementation_plan.md` and its verified `walkthrough.md` serves as the primary milestone boundary and evaluation anchor for proposing a repository release tag on GitHub.
+All bugs discovered by the user must be formally tracked on GitHub with root cause analysis and resolution, while the completion of an `implementation_plan.md` and its verified `walkthrough.md` serves as the primary milestone boundary and evaluation anchor for proposing a repository release tag on GitHub.
 
-### Tagging Protocol & SemVer Reference
+### 1. Mandatory GitHub Issue Tracking for All User-Discovered Bugs
+
+Whenever a bug, unexpected visual artifact, functional defect, regression, performance degradation, or design flaw is discovered or reported by the user across any project or repository:
+
+1. **Mandatory Tracking on GitHub**:
+   - It is an unconditional requirement to create and track a formal GitHub Issue on GitHub.com (`gh issue create`) in the affected repository immediately upon report.
+   - Never fix, patch, or close a user-discovered defect silently or informally.
+2. **Immediate Issue Logging**:
+   - Log the issue immediately so it is assigned, tracked, and visible to all stakeholders before or alongside the implementation plan.
+   - Title format must be structured and descriptive:
+     ```
+     [Bug] <Component/Subsystem>: <Concise description of the observed defect>
+     ```
+3. **Mandatory Issue Content & Structure**:
+   Every tracked issue must strictly adhere to the following six-part architecture:
+   - **User Report & Context**:
+     - Complete description of what the user observed and reported.
+     - Direct references to screenshots, screen recordings, user interaction sequences, and system logs.
+   - **Reproduction Steps**:
+     - Precise, minimal steps to reproduce the issue from the UI or programmatic API.
+   - **Deep First-Principles Root Cause Analysis (RCA)**:
+     - Rigorous engineering dissection explaining *why* the bug occurred at the source.
+     - Identifies the underlying mechanism (e.g., SwiftUI layout proposal inflation, unconstrained shape expansion, coordinate system distortion, viewport margin clamping edge cases, thread concurrency violation, floating-point precision loss, off-by-one boundary condition).
+   - **Proposed & Implemented Resolution**:
+     - Concrete architectural and code changes implemented to eliminate the bug at its root (never merely masking symptoms or applying temporary workarounds).
+     - Component files modified with exact architectural rationale.
+   - **Automated & Unit Test Verification**:
+     - Specific unit tests, regression suites, and assertions added to permanently guard against regression.
+     - Automated test execution metrics and pass rate (100% pass rate requirement across all packages).
+   - **Traceability & Commits**:
+     - Commit hash(es) implementing the fix using GitHub auto-closing keywords (e.g., `Fixes #<number>`, `Closes #<number>`).
+4. **Issue Lifecycle & Closure Protocol**:
+   - Keep the issue open while implementation and verification are underway.
+   - Once all fixes are written and verified with a 100% test pass rate (`swift test`), commit with `Fixes #<number>` and push to the remote repository.
+   - Close the issue on GitHub (`gh issue close <number> --comment "..."`) with a comprehensive closing resolution comment detailing the RCA, fix, and verification.
+   - Cross-reference the issue number in `Docs/BACKLOG.md` and the project chronological history (`Docs/History/`).
+
+### 2. Tagging Protocol & SemVer Reference
 - **Walkthrough as Milestone Anchor**: Whenever a `walkthrough.md` confirms that all proposed changes have been implemented, tested, and verified with zero regressions, evaluate whether the completed scope warrants a release tag.
 - **Strict Semantic Versioning (`vMAJOR.MINOR.PATCH`)**:
   - **`PATCH` (`v1.0.X`)**: Bug fixes, minor optimizations, or documentation/history consolidations verified by a walkthrough that maintain 100% backward compatibility.
