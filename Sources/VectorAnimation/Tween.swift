@@ -2,7 +2,7 @@
 //
 // This source file is part of the MeridianCore open source project
 //
-// Copyright (c) 2026 Apple Inc. and the MeridianCore project authors
+// Copyright (c) 2026 the MeridianCore project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // ===----------------------------------------------------------------------===

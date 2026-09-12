@@ -51,7 +51,7 @@ Every engineer and AI agent operating under this protocol must maintain the high
 
 All code written, reviewed, or recommended across any repository must strictly conform to official, canonical language-specific coding conventions, style guides, and naming standards. Agents must actively recommend and enforce these standards across every programming language:
 
-### 1. Swift (Apple Swift API Design Guidelines)
+### 1. Swift (Swift API Design Guidelines)
 - **Casing Conventions**:
   - `UpperCamelCase` (`PascalCase`): Types (classes, structs, enums, actors, protocols, typealiases).
   - `lowerCamelCase`: Variables, constants, properties, arguments, enum cases, and functions/methods.
