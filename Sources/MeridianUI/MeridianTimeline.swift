@@ -178,30 +178,6 @@ public struct MeridianTimeline<Mapping: TimelineCoordinateMapping>: View {
                 )
             }
             .frame(height: 30)
-
-            // Zoom In / Zoom Out Quick Buttons
-            HStack(spacing: 2) {
-                Button {
-                    zoom(by: 0.8)
-                } label: {
-                    Image(systemName: "plus.magnifyingglass")
-                        .font(.system(size: 11))
-                        .foregroundColor(Color.white.opacity(0.7))
-                        .padding(4)
-                }
-                .buttonStyle(.plain)
-
-                Button {
-                    zoom(by: 1.25)
-                } label: {
-                    Image(systemName: "minus.magnifyingglass")
-                        .font(.system(size: 11))
-                        .foregroundColor(Color.white.opacity(0.7))
-                        .padding(4)
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(.trailing, 6)
         }
         .frame(height: 32)
         .background(Color(nsColorOrUIColor: 0x181B22))
@@ -211,11 +187,5 @@ public struct MeridianTimeline<Mapping: TimelineCoordinateMapping>: View {
                 .foregroundColor(Color.white.opacity(0.1)),
             alignment: .top
         )
-    }
-
-    private func zoom(by factor: Double) {
-        let center = (visibleRange.lowerBound + visibleRange.upperBound) / 2
-        let halfSpan = ((visibleRange.upperBound - visibleRange.lowerBound) * factor) / 2
-        visibleRange = (center - halfSpan)...(center + halfSpan)
     }
 }
