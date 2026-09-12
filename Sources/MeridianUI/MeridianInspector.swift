@@ -2,14 +2,17 @@
 // MeridianInspector.swift
 // MeridianUI
 //
-// A dockable, resizable sidebar inspector panel with tabbed navigation,
-// collapsibility, and smooth width drag resizing.
+// Copyright (c) 2026 the Meridian project authors
+// Licensed under Apache License v2.0
+//
+// A dockable, resizable sidebar inspector panel and native macOS inspector modifier
+// with tabbed navigation, collapsibility, and smooth width drag resizing.
 //
 
 import SwiftUI
 
 /// Definition for an individual tab within a `MeridianInspector`.
-public struct MeridianInspectorTab: Identifiable, Sendable {
+public struct MeridianInspectorTab: Identifiable, Sendable, Equatable {
     public let id: String
     public let title: String
     public let iconSystemName: String
@@ -29,10 +32,81 @@ public enum MeridianInspectorEdge: Sendable {
     case trailing
 }
 
+/// Tab bar header component for inspector panels.
+public struct MeridianInspectorTabBar: View {
+    public let tabs: [MeridianInspectorTab]
+    @Binding public var selectedTabID: String
+    public var onToggleCollapse: (() -> Void)? = nil
+    public var edge: MeridianInspectorEdge = .trailing
+
+    public init(
+        tabs: [MeridianInspectorTab],
+        selectedTabID: Binding<String>,
+        onToggleCollapse: (() -> Void)? = nil,
+        edge: MeridianInspectorEdge = .trailing
+    ) {
+        self.tabs = tabs
+        self._selectedTabID = selectedTabID
+        self.onToggleCollapse = onToggleCollapse
+        self.edge = edge
+    }
+
+    public var body: some View {
+        HStack(spacing: 0) {
+            ForEach(tabs) { tab in
+                let isSelected = selectedTabID == tab.id
+                Button {
+                    selectedTabID = tab.id
+                } label: {
+                    VStack(spacing: 3) {
+                        Image(systemName: tab.iconSystemName)
+                            .font(.system(size: 11, weight: isSelected ? .semibold : .regular))
+
+                        Text(tab.title)
+                            .font(.caption2.weight(isSelected ? .bold : .medium))
+                    }
+                    .foregroundColor(isSelected ? .accentColor : .secondary)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 42)
+                    .background(isSelected ? Color.primary.opacity(0.06) : Color.clear)
+                    .overlay(
+                        Rectangle()
+                            .frame(height: 2)
+                            .foregroundColor(isSelected ? .accentColor : Color.clear),
+                        alignment: .bottom
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+
+            if let onToggle = onToggleCollapse {
+                Button {
+                    onToggle()
+                } label: {
+                    Image(systemName: edge == .trailing ? "sidebar.right" : "sidebar.left")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 10)
+                        .frame(height: 42)
+                }
+                .buttonStyle(.plain)
+                .help("Toggle Inspector")
+            }
+        }
+        .background(.bar)
+        .overlay(
+            Rectangle()
+                .frame(height: 1)
+                .foregroundColor(Color.primary.opacity(0.08)),
+            alignment: .bottom
+        )
+    }
+}
+
 /// A dockable, interactive, resizable inspector panel component.
 ///
 /// Supports multi-tab headers, dynamic resizing via drag handle, and animated
-/// expansion/collapse.
+/// expansion/collapse using native system vibrancy materials.
 public struct MeridianInspector<Content: View>: View {
     public let tabs: [MeridianInspectorTab]
     @Binding public var selectedTabID: String
@@ -89,15 +163,22 @@ public struct MeridianInspector<Content: View>: View {
 
             if !isCollapsed {
                 VStack(spacing: 0) {
-                    // Inspector Header / Tab Bar
-                    headerBar
+                    MeridianInspectorTabBar(
+                        tabs: tabs,
+                        selectedTabID: $selectedTabID,
+                        onToggleCollapse: showsCollapseButton ? {
+                            withAnimation(.easeInOut(duration: 0.18)) {
+                                isCollapsed.toggle()
+                            }
+                        } : nil,
+                        edge: edge
+                    )
 
-                    // Selected Tab View
                     content(selectedTabID)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 .frame(width: width)
-                .background(Color(nsColorOrUIColor: 0x1E222D))
+                .background(.regularMaterial)
             }
 
             if edge == .leading {
@@ -107,65 +188,11 @@ public struct MeridianInspector<Content: View>: View {
         .animation(.easeInOut(duration: 0.18), value: isCollapsed)
     }
 
-    // MARK: - Header Bar
-    private var headerBar: some View {
-        HStack(spacing: 0) {
-            ForEach(tabs) { tab in
-                let isSelected = selectedTabID == tab.id
-                Button {
-                    selectedTabID = tab.id
-                } label: {
-                    VStack(spacing: 2) {
-                        Image(systemName: tab.iconSystemName)
-                            .font(.system(size: 11))
-                        Text(tab.title)
-                            .font(.system(size: 9, weight: isSelected ? .bold : .medium))
-                    }
-                    .foregroundColor(isSelected ? Color.blue : Color.white.opacity(0.6))
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 38)
-                    .background(isSelected ? Color.white.opacity(0.06) : Color.clear)
-                    .overlay(
-                        Rectangle()
-                            .frame(height: 2)
-                            .foregroundColor(isSelected ? Color.blue : Color.clear),
-                        alignment: .bottom
-                    )
-                }
-                .buttonStyle(.plain)
-            }
-
-            if showsCollapseButton {
-                // Optional collapse button (omitted by default when main app navigation provides the toggle)
-                Button {
-                    withAnimation {
-                        isCollapsed.toggle()
-                    }
-                } label: {
-                    Image(systemName: edge == .trailing ? "sidebar.right" : "sidebar.left")
-                        .font(.system(size: 12))
-                        .foregroundColor(Color.white.opacity(0.6))
-                        .padding(.horizontal, 8)
-                        .frame(height: 38)
-                }
-                .buttonStyle(.plain)
-                .help(isCollapsed ? "Expand Inspector" : "Collapse Inspector")
-            }
-        }
-        .background(Color(nsColorOrUIColor: 0x181B22))
-        .overlay(
-            Rectangle()
-                .frame(height: 1)
-                .foregroundColor(Color.white.opacity(0.1)),
-            alignment: .bottom
-        )
-    }
-
     // MARK: - Resize Handle
     private var resizeHandle: some View {
         Rectangle()
             .frame(width: 4)
-            .foregroundColor(isDraggingResizer ? Color.blue : Color.white.opacity(0.08))
+            .foregroundColor(isDraggingResizer ? Color.accentColor : Color.primary.opacity(0.08))
             .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 1)
@@ -182,5 +209,26 @@ public struct MeridianInspector<Content: View>: View {
                         isDraggingResizer = false
                     }
             )
+    }
+}
+
+// MARK: - Native Window Inspector Extension
+
+public extension View {
+    /// Mounts a native macOS inspector panel hosting tabbed navigation.
+    func meridianInspector<InspectorContent: View>(
+        isPresented: Binding<Bool>,
+        tabs: [MeridianInspectorTab],
+        selectedTabID: Binding<String>,
+        @ViewBuilder content: @escaping (String) -> InspectorContent
+    ) -> some View {
+        self.inspector(isPresented: isPresented) {
+            VStack(spacing: 0) {
+                MeridianInspectorTabBar(tabs: tabs, selectedTabID: selectedTabID)
+                content(selectedTabID.wrappedValue)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            .background(.regularMaterial)
+        }
     }
 }

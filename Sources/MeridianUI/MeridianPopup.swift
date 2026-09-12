@@ -63,13 +63,13 @@ public struct MeridianPopup<Content: View>: View {
                         content
                     }
                     .frame(width: safeWidth)
-                    .background(Color(nsColorOrUIColor: 0x1E222D))
+                    .background(.regularMaterial)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.white.opacity(0.12), lineWidth: 1.2)
+                            .stroke(Color.primary.opacity(0.12), lineWidth: 1)
                     )
-                    .shadow(color: Color.black.opacity(0.45), radius: 24, x: 0, y: 12)
+                    .shadow(color: Color.black.opacity(0.35), radius: 24, x: 0, y: 12)
                     .offset(offset)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -86,12 +86,12 @@ public struct MeridianPopup<Content: View>: View {
             HStack(spacing: 6) {
                 Image(systemName: "line.3.horizontal")
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(Color.white.opacity(0.4))
+                    .foregroundColor(.secondary)
 
                 if let title = title {
                     Text(title)
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(Color.white.opacity(0.85))
+                        .foregroundColor(.primary)
                 }
             }
 
@@ -103,9 +103,9 @@ public struct MeridianPopup<Content: View>: View {
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(isHoveringClose ? Color.white : Color.white.opacity(0.5))
+                    .foregroundColor(isHoveringClose ? .primary : .secondary)
                     .frame(width: 20, height: 20)
-                    .background(isHoveringClose ? Color.white.opacity(0.12) : Color.clear)
+                    .background(isHoveringClose ? Color.primary.opacity(0.1) : Color.clear)
                     .clipShape(Circle())
             }
             .buttonStyle(.plain)
@@ -115,7 +115,7 @@ public struct MeridianPopup<Content: View>: View {
         }
         .padding(.horizontal, 14)
         .frame(height: 36)
-        .background(Color(nsColorOrUIColor: 0x181B22))
+        .background(.bar)
         .contentShape(Rectangle())
         .gesture(
             DragGesture(minimumDistance: 1)

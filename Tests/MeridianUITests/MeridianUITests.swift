@@ -283,5 +283,49 @@ struct MeridianUITests {
         #expect(panel.horizontalSizing == .fillParent)
         #expect(panel.verticalSizing == .resizable(min: 150, max: 600, defaultSize: 280))
     }
+
+    // MARK: - Direct Manipulation Canvas Tests
+
+    @Test("CanvasManipulationConfig initializes with custom and default bounds")
+    func testCanvasConfig() {
+        let defaultConfig = CanvasManipulationConfig.default
+        #expect(defaultConfig.minScale == 0.15)
+        #expect(defaultConfig.maxScale == 6.0)
+        #expect(defaultConfig.springResponse == 0.35)
+
+        let customConfig = CanvasManipulationConfig(
+            minScale: 0.5,
+            maxScale: 3.0,
+            springResponse: 0.25,
+            dampingFraction: 0.9
+        )
+        #expect(customConfig.minScale == 0.5)
+        #expect(customConfig.maxScale == 3.0)
+        #expect(customConfig.springResponse == 0.25)
+        #expect(customConfig.dampingFraction == 0.9)
+    }
+
+    @Test("MeridianGlassCornerStyle corner radius calculations")
+    func testGlassCornerStyle() {
+        let rounded = MeridianGlassCornerStyle.rounded(16)
+        #expect(rounded.cornerRadius == 16)
+
+        let capsule = MeridianGlassCornerStyle.capsule
+        #expect(capsule.cornerRadius == 9999)
+
+        let continuous = MeridianGlassCornerStyle.continuous(20)
+        #expect(continuous.cornerRadius == 20)
+    }
+
+    @Test("MeridianInspectorTabBar and Tab equality")
+    func testInspectorTabBarAndTab() {
+        let tab1 = MeridianInspectorTab(id: "fleet", title: "Fleet", iconSystemName: "bus.fill")
+        let tab2 = MeridianInspectorTab(id: "fleet", title: "Fleet", iconSystemName: "bus.fill")
+        let tab3 = MeridianInspectorTab(id: "metrics", title: "Metrics", iconSystemName: "chart.xyaxis.line")
+
+        #expect(tab1 == tab2)
+        #expect(tab1 != tab3)
+    }
 }
+
 

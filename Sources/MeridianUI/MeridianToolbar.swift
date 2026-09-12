@@ -77,10 +77,11 @@ public struct MeridianToolbar<Content: View>: View {
     private var toolbarBackground: some View {
         switch style {
         case .glassmorphic:
-            Color.black.opacity(0.65)
+            Color.clear
                 .background(.ultraThinMaterial)
         case .opaquePanel:
-            Color(nsColorOrUIColor: 0x1E222D)
+            Color.clear
+                .background(.regularMaterial)
         case .borderless:
             Color.clear
         }
@@ -89,9 +90,9 @@ public struct MeridianToolbar<Content: View>: View {
     private var borderColor: Color {
         switch style {
         case .glassmorphic:
-            return Color.white.opacity(0.12)
+            return Color.white.opacity(0.14)
         case .opaquePanel:
-            return Color.white.opacity(0.08)
+            return Color.primary.opacity(0.08)
         case .borderless:
             return Color.clear
         }
@@ -167,19 +168,19 @@ public struct MeridianToolbarButton: View {
 
     private var foregroundColor: Color {
         if isSelected {
-            return Color.blue
+            return Color.accentColor
         } else if isHovering {
-            return Color.white
+            return Color.primary
         } else {
-            return Color.white.opacity(0.7)
+            return Color.secondary
         }
     }
 
     private var backgroundHighlight: Color {
         if isSelected {
-            return Color.blue.opacity(0.18)
+            return Color.accentColor.opacity(0.18)
         } else if isHovering {
-            return Color.white.opacity(0.08)
+            return Color.primary.opacity(0.08)
         } else {
             return Color.clear
         }
