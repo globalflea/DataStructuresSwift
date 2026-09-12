@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.4
 import PackageDescription
 
 let package = Package(
@@ -52,8 +52,7 @@ let package = Package(
             dependencies: [],
             path: "Sources/MeridianCore",
             swiftSettings: [
-                .enableUpcomingFeature("StrictConcurrency"),
-                .enableExperimentalFeature("StrictConcurrency")
+                .enableUpcomingFeature("ApproachableConcurrency"),
             ]
         ),
         .target(
@@ -61,8 +60,7 @@ let package = Package(
             dependencies: ["MeridianCore"],
             path: "Sources/Resilience",
             swiftSettings: [
-                .enableUpcomingFeature("StrictConcurrency"),
-                .enableExperimentalFeature("StrictConcurrency")
+                .enableUpcomingFeature("ApproachableConcurrency"),
             ]
         ),
         .target(
@@ -70,8 +68,7 @@ let package = Package(
             dependencies: [],
             path: "Sources/VectorGeometry",
             swiftSettings: [
-                .enableUpcomingFeature("StrictConcurrency"),
-                .enableExperimentalFeature("StrictConcurrency")
+                .enableUpcomingFeature("ApproachableConcurrency"),
             ]
         ),
         .target(
@@ -79,8 +76,7 @@ let package = Package(
             dependencies: ["VectorGeometry"],
             path: "Sources/VectorAnimation",
             swiftSettings: [
-                .enableUpcomingFeature("StrictConcurrency"),
-                .enableExperimentalFeature("StrictConcurrency")
+                .enableUpcomingFeature("ApproachableConcurrency"),
             ]
         ),
         .target(
@@ -88,8 +84,7 @@ let package = Package(
             dependencies: ["VectorGeometry"],
             path: "Sources/VectorLayout",
             swiftSettings: [
-                .enableUpcomingFeature("StrictConcurrency"),
-                .enableExperimentalFeature("StrictConcurrency")
+                .enableUpcomingFeature("ApproachableConcurrency"),
             ]
         ),
         .target(
@@ -97,39 +92,56 @@ let package = Package(
             dependencies: ["VectorGeometry"],
             path: "Sources/MeridianUI",
             swiftSettings: [
-                .enableUpcomingFeature("StrictConcurrency"),
-                .enableExperimentalFeature("StrictConcurrency")
+                .enableUpcomingFeature("ApproachableConcurrency"),
             ]
         ),
         .testTarget(
             name: "MeridianCoreTests",
             dependencies: ["MeridianCore"],
-            path: "Tests/MeridianCoreTests"
+            path: "Tests/MeridianCoreTests",
+            swiftSettings: [
+                .enableUpcomingFeature("ApproachableConcurrency"),
+            ]
         ),
         .testTarget(
             name: "ResilienceTests",
             dependencies: ["MeridianCore", "Resilience"],
-            path: "Tests/ResilienceTests"
+            path: "Tests/ResilienceTests",
+            swiftSettings: [
+                .enableUpcomingFeature("ApproachableConcurrency"),
+            ]
         ),
         .testTarget(
             name: "VectorGeometryTests",
             dependencies: ["VectorGeometry"],
-            path: "Tests/VectorGeometryTests"
+            path: "Tests/VectorGeometryTests",
+            swiftSettings: [
+                .enableUpcomingFeature("ApproachableConcurrency"),
+            ]
         ),
         .testTarget(
             name: "VectorAnimationTests",
             dependencies: ["VectorGeometry", "VectorAnimation"],
-            path: "Tests/VectorAnimationTests"
+            path: "Tests/VectorAnimationTests",
+            swiftSettings: [
+                .enableUpcomingFeature("ApproachableConcurrency"),
+            ]
         ),
         .testTarget(
             name: "VectorLayoutTests",
             dependencies: ["VectorGeometry", "VectorLayout"],
-            path: "Tests/VectorLayoutTests"
+            path: "Tests/VectorLayoutTests",
+            swiftSettings: [
+                .enableUpcomingFeature("ApproachableConcurrency"),
+            ]
         ),
         .testTarget(
             name: "MeridianUITests",
             dependencies: ["MeridianUI"],
-            path: "Tests/MeridianUITests"
+            path: "Tests/MeridianUITests",
+            swiftSettings: [
+                .enableUpcomingFeature("ApproachableConcurrency"),
+            ]
         )
     ]
 )
